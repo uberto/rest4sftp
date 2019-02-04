@@ -1,0 +1,73 @@
+package org.rest4sftp.ftp
+
+import org.rest4sftp.model.FtpHost
+import org.rest4sftp.model.SimpleFtpClient
+import org.apache.commons.net.PrintCommandListener
+import org.apache.commons.net.ftp.FTPClient
+import org.apache.commons.net.ftp.FTPFile
+import org.apache.commons.net.ftp.FTPReply
+import java.io.InputStream
+import java.io.PrintWriter
+
+class ApacheCommonsFtpClient(private val ftpHost: FtpHost) : SimpleFtpClient {
+
+    private val ftp = FTPClient()
+
+    fun withDebug() = apply {
+        ftp.addProtocolCommandListener(PrintCommandListener(PrintWriter(System.out)))
+    }
+
+    override fun connect() = apply {
+        check("FTP server refused connection.") { ftp.connect(ftpHost.host, ftpHost.port) }
+        check("Invalid login.") { ftp.login(ftpHost.userName, ftpHost.password) }
+        check("FTP server not able to passive mode.") { ftp.enterLocalPassiveMode() }
+    }
+
+    override fun close() {
+        if (ftp.isConnected) {
+            runCatching {
+                ftp.logout()
+                ftp.disconnect()
+            }
+        }
+    }
+
+    override fun listFiles(directoryName: String): List<FTPFile> =
+        if (ftp.changeWorkingDirectory(directoryName))
+            ftp.listFiles().toList()
+        else emptyList()
+
+    override fun createFolder(directoryName: String): Boolean = ftp.makeDirectory(directoryName)
+
+    override fun deleteFolder(directoryName: String): Boolean = ftp.removeDirectory(directoryName)
+
+    override fun retrieveFile(directoryName: String, fileName: String): ByteArray =
+        if (ftp.changeWorkingDirectory(directoryName))
+            ftp.retrieveFileStream(fileName)?.use {
+                it.readBytes()
+            } ?: ByteArray(0)
+        else ByteArray(0)
+
+    override fun uploadFile(directoryName: String, fileName: String, upload: InputStream): Boolean =
+        ftp.changeWorkingDirectory(directoryName)
+        && ftp.storeFile(fileName, upload)
+
+    override fun deleteFile(directoryName: String, fileName: String): Boolean =
+        ftp.changeWorkingDirectory(directoryName)
+        && ftp.deleteFile(fileName)
+
+    private fun <R> check(errorMsg: String, block: () -> R): R {
+        try {
+            val result = block()
+
+            if (! FTPReply.isPositiveCompletion(ftp.replyCode)) {
+                System.err.println(errorMsg)
+                throw RuntimeException(errorMsg)
+            }
+            return result
+        } catch (e: Throwable) {
+            throw RuntimeException(e)
+        }
+    }
+
+}

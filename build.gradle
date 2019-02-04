@@ -1,0 +1,88 @@
+group 'org.rest4sftp'
+version '1.0-SNAPSHOT'
+
+
+apply plugin: "application"
+apply plugin: "idea"
+apply plugin: "kotlin"
+
+
+ext {
+    httpVersion = "4.5.3"
+    http4kVersion = "3.112.0"
+    jettyVersion = "9.4.7.v20170914"
+    jvmVersion = "1.8"
+    slf4jVersion = "1.7.25"
+    junitVersion = '5.1.1'
+    jacksonVersion = '2.9.8'
+}
+
+buildscript {
+    ext.kotlinVersion = "1.3.20"
+
+    repositories {
+        jcenter()
+    }
+    dependencies {
+        classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlinVersion"
+    }
+}
+
+wrapper {
+    gradleVersion = "5.1.1"
+}
+
+sourceCompatibility = "${jvmVersion}"
+targetCompatibility = "${jvmVersion}"
+
+repositories {
+    jcenter()
+}
+
+compileKotlin {
+    kotlinOptions {
+        jvmTarget = "${jvmVersion}"
+    }
+}
+
+compileTestKotlin {
+    kotlinOptions {
+        jvmTarget = "${jvmVersion}"
+    }
+}
+
+
+test {
+    exclude 'integrationtest/**/*'
+}
+
+
+applicationName = archivesBaseName
+applicationDefaultJvmArgs = ["-Dfile.encoding=UTF-8", "-Duser.timezone=UTC"]
+
+mainClassName = "org.rest4sftp.RestfulServerKt"
+
+
+
+dependencies{
+
+    compile "org.jetbrains.kotlin:kotlin-stdlib-jdk8:${kotlinVersion}"
+    compile "org.jetbrains.kotlin:kotlin-reflect:${kotlinVersion}"
+    compile "org.jetbrains.kotlinx:kotlinx-coroutines-core:1.1.1"
+    compile  "org.http4k:http4k-core:${http4kVersion}"
+    compile  "org.http4k:http4k-client-apache:${http4kVersion}"
+    compile  "org.http4k:http4k-server-jetty:${http4kVersion}"
+    compile  "org.http4k:http4k-multipart:${http4kVersion}"
+    compile  "com.fasterxml.jackson.core:jackson-core:${jacksonVersion}"
+    compile  "com.fasterxml.jackson.core:jackson-databind:${jacksonVersion}"
+
+    compile 'commons-net:commons-net:3.6'
+    compile 'com.hierynomus:sshj:0.27.0'
+
+
+    testCompile   'com.willowtreeapps.assertk:assertk-jvm:0.13'
+    testCompile   "org.junit.jupiter:junit-jupiter-api:${junitVersion}"
+    testCompile   "org.junit.jupiter:junit-jupiter-engine:${junitVersion}"
+    testCompile   "org.junit.jupiter:junit-jupiter-params:${junitVersion}"
+
+}

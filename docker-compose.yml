@@ -1,0 +1,14 @@
+version: "3"
+
+services:
+  ftpserver:
+    image: "stilliard/pure-ftpd:hardened"
+    environment:
+      - FTP_USER_NAME=bob
+      - FTP_USER_PASS=12345
+      - FTP_USER_HOME=/home/bob
+    ports:
+      - "21:21"
+      - "30000-30009:30000-30009"
+    volumes:
+      - "./ftp-content-root:/home/bob/ftproot"
