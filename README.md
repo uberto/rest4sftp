@@ -2,4 +2,4 @@
 
 Bridge from RESTful api to SFTP and FTP
 
-Beautifully written by Assad, Tom and Uberto
+Beautifully written by Asad, Tom and Uberto
