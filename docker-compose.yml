@@ -11,7 +11,7 @@ services:
       - "21:21"
       - "30000-30009:30000-30009"
     volumes:
-      - "./ftp-content-root:/home/bob/ftproot"
+      - "./ftp-content-root:/home/bob/upload"
 
   sftp:
     image: "atmoz/sftp"

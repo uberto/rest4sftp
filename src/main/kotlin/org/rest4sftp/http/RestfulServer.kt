@@ -6,7 +6,7 @@ import org.rest4sftp.model.CommandHandler
 import org.rest4sftp.model.CreateFolder
 import org.rest4sftp.model.DeleteFile
 import org.rest4sftp.model.DeleteFolder
-import org.rest4sftp.model.FtpHost
+import org.rest4sftp.model.RemoteHost
 import org.rest4sftp.model.HttpResult
 import org.rest4sftp.model.InputStreamResponseBody
 import org.rest4sftp.model.JsonResponseBody
@@ -40,9 +40,9 @@ class RestfulServer(private val commandHandler: CommandHandler) : HttpHandler {
         ).invoke(request)
 
 
-    private fun Request.toFtpHost(): FtpHost =
+    private fun Request.toFtpHost(): RemoteHost =
         headers.toMap().let {
-            FtpHost(
+            RemoteHost(
                     host = it["host"].orEmpty(),
                     port = it["port"]?.toIntOrNull() ?: 21,
                     userName = it["user"].orEmpty(),

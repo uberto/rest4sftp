@@ -1,12 +1,12 @@
 package unittest.org.rest4sftp.testing
 
-import org.rest4sftp.model.FtpHost
-import org.rest4sftp.model.SimpleFtpClient
+import org.rest4sftp.model.RemoteHost
+import org.rest4sftp.model.SimpleRemoteClient
 import org.apache.commons.net.ftp.FTPFile
 import org.junit.jupiter.api.Assertions.assertTrue
 import java.io.InputStream
 
-class SpySimpleFtpClient(val ftpHost: FtpHost, val files: MutableMap<String, MutableList<FTPFile>>) : SimpleFtpClient {
+class SpySimpleRemoteClient(val remoteHost: RemoteHost, val files: MutableMap<String, MutableList<FTPFile>>) : SimpleRemoteClient {
     override fun deleteFolder(directoryName: String): Boolean {
         assertTrue(isConnected)
         return files.remove(directoryName)?.let { true } ?: false
@@ -42,7 +42,7 @@ class SpySimpleFtpClient(val ftpHost: FtpHost, val files: MutableMap<String, Mut
         return files[directoryName]?.removeIf { it.name == fileName } ?: false
     }
 
-    override fun connect(): SimpleFtpClient {
+    override fun connect(): SimpleRemoteClient {
         isConnected = true
         return this
     }

@@ -6,7 +6,6 @@ import assertk.Assert
 import assertk.all
 import assertk.assertThat
 import assertk.assertions.isEqualTo
-import assertk.assertions.support.expected
 import com.fasterxml.jackson.databind.ObjectMapper
 import org.apache.commons.net.ftp.FTPFile
 import org.http4k.core.Body
@@ -21,7 +20,7 @@ import org.http4k.core.Status.Companion.NOT_FOUND
 import org.http4k.core.Status.Companion.OK
 import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Test
-import unittest.org.rest4sftp.testing.SpySimpleFtpClient
+import unittest.org.rest4sftp.testing.SpySimpleRemoteClient
 
 class RestfulServerTest {
 
@@ -29,9 +28,9 @@ class RestfulServerTest {
     private val file2 = FTPFile().apply { name = "file2"; size = 234 }
     private val files = mutableMapOf("folder1" to mutableListOf(file1, file2))
 
-    private lateinit var fakeFtpClient: SpySimpleFtpClient
+    private lateinit var fakeFtpClient: SpySimpleRemoteClient
     private val handler = RestfulServer(CommandHandler {
-        fakeFtpClient = SpySimpleFtpClient(it, files)
+        fakeFtpClient = SpySimpleRemoteClient(it, files)
         fakeFtpClient
     })
 
