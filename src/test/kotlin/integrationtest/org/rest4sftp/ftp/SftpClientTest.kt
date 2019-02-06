@@ -8,7 +8,7 @@ import org.rest4sftp.model.SimpleRemoteClient
 @Disabled
 class SftpClientTest: RemoteClientTest() {
 
-    val ftpHost = RemoteHost(host = "127.0.0.1", port = 22, userName = "foo", password = "pass")
+    val ftpHost = RemoteHost(host = "127.0.0.1", port = 2222, userName = "foo", password = "pass")
 
     override fun createConnection(): SimpleRemoteClient = SshJSftpClient(ftpHost).connect()
 

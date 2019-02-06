@@ -1,7 +1,11 @@
 package integrationtest.org.rest4sftp.ftp
 
 import assertk.assertThat
-import assertk.assertions.*
+import assertk.assertions.contains
+import assertk.assertions.hasSize
+import assertk.assertions.isEmpty
+import assertk.assertions.isEqualTo
+import assertk.assertions.isGreaterThan
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Test
 import org.rest4sftp.model.SimpleRemoteClient
@@ -27,7 +31,7 @@ abstract class RemoteClientTest {
     @Test
     fun `retrieve empty list from non existent dir`() {
 
-        val files = createConnection().use { it.listFiles("/upload1") }
+        val files = createConnection().use { it.listFiles("/upload123") }
 
         assertThat(files).isEmpty()
     }

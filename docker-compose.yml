@@ -16,7 +16,7 @@ services:
   sftp:
     image: "atmoz/sftp"
     ports:
-    - "22:22"
+    - "2222:22"
     volumes:
         - "./ssh-keys/ed25519_key:/etc/ssh/ssh_host_ed25519_key"
         - "./ssh-keys/ed25519_key.pub:/etc/ssh/ssh_host_ed25519_key.pub"

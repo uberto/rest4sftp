@@ -1,15 +1,16 @@
 package org.rest4sftp.ftp
 
-import org.rest4sftp.model.RemoteHost
-import org.rest4sftp.model.SimpleRemoteClient
 import org.apache.commons.net.PrintCommandListener
 import org.apache.commons.net.ftp.FTPClient
 import org.apache.commons.net.ftp.FTPFile
 import org.apache.commons.net.ftp.FTPReply
+import org.rest4sftp.model.RemoteHost
+import org.rest4sftp.model.SimpleRemoteClient
 import java.io.InputStream
 import java.io.PrintWriter
+import java.time.Duration
 
-class ApacheCommonsFtpClient(private val remoteHost: RemoteHost) : SimpleRemoteClient {
+class ApacheCommonsFtpClient(private val remoteHost: RemoteHost, val timeout: Duration) : SimpleRemoteClient {
 
     private val ftp = FTPClient()
 
@@ -18,6 +19,7 @@ class ApacheCommonsFtpClient(private val remoteHost: RemoteHost) : SimpleRemoteC
     }
 
     override fun connect() = apply {
+        ftp.setDataTimeout(timeout.toMillis().toInt())
         check("FTP server refused connection.") { ftp.connect(remoteHost.host, remoteHost.port) }
         check("Invalid login.") { ftp.login(remoteHost.userName, remoteHost.password) }
         check("FTP server not able to passive mode.") { ftp.enterLocalPassiveMode() }

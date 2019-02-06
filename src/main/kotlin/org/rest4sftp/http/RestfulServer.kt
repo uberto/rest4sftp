@@ -1,19 +1,5 @@
 package org.rest4sftp.http
 
-import org.rest4sftp.ftp.ApacheCommonsFtpClient
-import org.rest4sftp.model.Command
-import org.rest4sftp.model.CommandHandler
-import org.rest4sftp.model.CreateFolder
-import org.rest4sftp.model.DeleteFile
-import org.rest4sftp.model.DeleteFolder
-import org.rest4sftp.model.RemoteHost
-import org.rest4sftp.model.HttpResult
-import org.rest4sftp.model.InputStreamResponseBody
-import org.rest4sftp.model.JsonResponseBody
-import org.rest4sftp.model.RetrieveFile
-import org.rest4sftp.model.RetrieveFolder
-import org.rest4sftp.model.StringResponseBody
-import org.rest4sftp.model.UploadFile
 import org.http4k.core.HttpHandler
 import org.http4k.core.Method.DELETE
 import org.http4k.core.Method.GET
@@ -25,6 +11,21 @@ import org.http4k.routing.path
 import org.http4k.routing.routes
 import org.http4k.server.Jetty
 import org.http4k.server.asServer
+import org.rest4sftp.ftp.ApacheCommonsFtpClient
+import org.rest4sftp.model.Command
+import org.rest4sftp.model.CommandHandler
+import org.rest4sftp.model.CreateFolder
+import org.rest4sftp.model.DeleteFile
+import org.rest4sftp.model.DeleteFolder
+import org.rest4sftp.model.HttpResult
+import org.rest4sftp.model.InputStreamResponseBody
+import org.rest4sftp.model.JsonResponseBody
+import org.rest4sftp.model.RemoteHost
+import org.rest4sftp.model.RetrieveFile
+import org.rest4sftp.model.RetrieveFolder
+import org.rest4sftp.model.StringResponseBody
+import org.rest4sftp.model.UploadFile
+import java.time.Duration
 
 
 class RestfulServer(private val commandHandler: CommandHandler) : HttpHandler {
@@ -70,5 +71,9 @@ class RestfulServer(private val commandHandler: CommandHandler) : HttpHandler {
 }
 
 fun main() {
-    RestfulServer(CommandHandler { ApacheCommonsFtpClient(it) }).start(7070)
+
+    //get from args if FTP or SFTP and the port and timeout
+    //or a config file?
+
+    RestfulServer(CommandHandler { ApacheCommonsFtpClient(it, Duration.ofSeconds(5)) }).start(7070)
 }
