@@ -3,6 +3,7 @@ package org.rest4sftp.ftp
 import net.schmizz.sshj.DefaultConfig
 import net.schmizz.sshj.SSHClient
 import net.schmizz.sshj.sftp.RemoteResourceInfo
+import net.schmizz.sshj.transport.verification.PromiscuousVerifier
 import org.apache.commons.net.ftp.FTPFile
 import org.rest4sftp.model.RemoteHost
 import org.rest4sftp.model.SimpleRemoteClient
@@ -58,7 +59,7 @@ class SshJSftpClient(val remoteHost: RemoteHost): SimpleRemoteClient {
     }
 
     override fun connect(): SimpleRemoteClient {
-//        sshClient.addHostKeyVerifier(PromiscuousVerifier())
+        sshClient.addHostKeyVerifier(PromiscuousVerifier())
         sshClient.connect(remoteHost.host, remoteHost.port)
         sshClient.authPassword(remoteHost.userName, remoteHost.password)
         return this

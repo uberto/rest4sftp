@@ -22,6 +22,6 @@ services:
         - "./ssh-keys/ed25519_key.pub:/etc/ssh/ssh_host_ed25519_key.pub"
         - "./ssh-keys/rsa_key:/etc/ssh/ssh_host_rsa_key"
         - "./ssh-keys/rsa_key.pub:/etc/ssh/ssh_host_rsa_key.pub"
-        - "./ftp-content-root:/home/foo/upload"
-    command: foo:pass:1001
+        - "./ftp-content-root:/home/bob/upload"
+    command: bob:12345:1001
 
