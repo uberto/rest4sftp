@@ -1,6 +1,7 @@
 package integrationtest.org.rest4sftp.ftp
 
 import org.junit.jupiter.api.Disabled
+import org.rest4sftp.ftp.SshJSftpClient
 import org.rest4sftp.model.RemoteHost
 import org.rest4sftp.model.SimpleRemoteClient
 

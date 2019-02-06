@@ -1,11 +1,17 @@
-package integrationtest.org.rest4sftp.ftp
+package org.rest4sftp.ftp
 
+import net.schmizz.sshj.DefaultConfig
+import net.schmizz.sshj.SSHClient
+import net.schmizz.sshj.transport.verification.PromiscuousVerifier
 import org.apache.commons.net.ftp.FTPFile
 import org.rest4sftp.model.RemoteHost
 import org.rest4sftp.model.SimpleRemoteClient
 import java.io.InputStream
 
-class SshJSftpClient(remoteHost: RemoteHost): SimpleRemoteClient {
+class SshJSftpClient(val remoteHost: RemoteHost): SimpleRemoteClient {
+
+    val sshClient = SSHClient(DefaultConfig())
+
     override fun listFiles(directoryName: String): List<FTPFile> {
         TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
     }
@@ -31,11 +37,13 @@ class SshJSftpClient(remoteHost: RemoteHost): SimpleRemoteClient {
     }
 
     override fun connect(): SimpleRemoteClient {
-        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+        sshClient.addHostKeyVerifier(PromiscuousVerifier())
+        sshClient.connect(remoteHost.host, remoteHost.port)
+        return this
     }
 
     override fun close() {
-        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+        sshClient.close()
     }
 
 }
