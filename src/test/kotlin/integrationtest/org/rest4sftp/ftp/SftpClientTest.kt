@@ -1,12 +1,11 @@
 package integrationtest.org.rest4sftp.ftp
 
-import org.junit.jupiter.api.Disabled
 import org.rest4sftp.ftp.SshJSftpClient
 import org.rest4sftp.model.RemoteHost
 import org.rest4sftp.model.SimpleRemoteClient
 
 
-@Disabled
+//@Disabled
 class SftpClientTest: RemoteClientTest() {
 
     val ftpHost = RemoteHost(host = "127.0.0.1", port = 2222, userName = "foo", password = "pass")
