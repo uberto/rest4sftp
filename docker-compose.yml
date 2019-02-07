@@ -23,5 +23,5 @@ services:
         - "./ssh-keys/rsa_key:/etc/ssh/ssh_host_rsa_key"
         - "./ssh-keys/rsa_key.pub:/etc/ssh/ssh_host_rsa_key.pub"
         - "./ftp-content-root:/home/bob/upload"
-    command: bob:12345:1001
+    command: bob:12345:::upload
 
