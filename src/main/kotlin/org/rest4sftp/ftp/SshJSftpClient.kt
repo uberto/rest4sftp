@@ -13,9 +13,10 @@ import java.io.ByteArrayOutputStream
 import java.io.InputStream
 import java.io.OutputStream
 import java.nio.file.Paths
+import java.time.Duration
 
 
-class SshJSftpClient(val remoteHost: RemoteHost): SimpleRemoteClient {
+class SshJSftpClient(val remoteHost: RemoteHost, val timeout: Duration): SimpleRemoteClient {
 
     val sshClient = SSHClient(DefaultConfig())
 
