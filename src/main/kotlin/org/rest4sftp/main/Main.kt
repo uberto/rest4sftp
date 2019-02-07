@@ -11,15 +11,13 @@ import java.time.Duration
 fun main(args: Array<String>) {
     ArgParser(args).parseInto(::MyArgs).run {
 
+        RestfulServer(CommandHandler{
         when(protocol){
-
-            Protocol.FTP -> RestfulServer(CommandHandler { ApacheCommonsFtpClient(it, Duration.ofSeconds(timeout)) })
-
-            Protocol.SFTP -> RestfulServer(CommandHandler { SshJSftpClient(it, Duration.ofSeconds(timeout)) })
-
-        }
-                .also { println("Starting RestfulServer in $protocol mode on port $port...") }
-                .start(port)
-                .block()
+            Protocol.FTP -> ApacheCommonsFtpClient(it, Duration.ofSeconds(timeout))
+            Protocol.SFTP -> SshJSftpClient(it, Duration.ofSeconds(timeout))
+        }})
+        .also { println("Starting RestfulServer in $protocol mode on port $port...") }
+        .start(port)
+        .block()
     }
 }

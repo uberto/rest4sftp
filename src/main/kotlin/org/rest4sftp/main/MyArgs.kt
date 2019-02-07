@@ -10,9 +10,9 @@ class MyArgs(parser: ArgParser) {
             "--sftp" to Protocol.SFTP,
             help = "protocol of remote server")
 
-    val timeout: Long by parser.storing("timeout in seconds"){toLong()}
+    val timeout: Long by parser.storing("timeout in seconds for remote server"){toLong()}
 
-    val port: Int by parser.storing("port "){toInt()}
+    val port: Int by parser.storing("port for restapi"){toInt()}
 }
 
 enum class Protocol {
