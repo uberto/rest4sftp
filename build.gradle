@@ -60,8 +60,7 @@ test {
 applicationName = archivesBaseName
 applicationDefaultJvmArgs = ["-Dfile.encoding=UTF-8", "-Duser.timezone=UTC"]
 
-mainClassName = "org.rest4sftp.RestfulServerKt"
-
+mainClassName = "org.rest4sftp.main.MainKt"
 
 
 dependencies{

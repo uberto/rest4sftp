@@ -13,10 +13,13 @@ fun main(args: Array<String>) {
 
         when(protocol){
 
-            Protocol.FTP -> RestfulServer(CommandHandler { ApacheCommonsFtpClient(it, Duration.ofSeconds(timeout)) }).start(port)
+            Protocol.FTP -> RestfulServer(CommandHandler { ApacheCommonsFtpClient(it, Duration.ofSeconds(timeout)) })
 
-            Protocol.SFTP -> RestfulServer(CommandHandler { SshJSftpClient(it, Duration.ofSeconds(timeout)) }).start(port)
+            Protocol.SFTP -> RestfulServer(CommandHandler { SshJSftpClient(it, Duration.ofSeconds(timeout)) })
 
         }
+                .also { println("Starting RestfulServer in $protocol mode on port $port...") }
+                .start(port)
+                .block()
     }
 }
