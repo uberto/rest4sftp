@@ -1,4 +1,4 @@
-package integrationtest.org.rest4sftp.ftp
+package integrationtest.com.ubertob.rest4sftp.ftp
 
 import assertk.assertThat
 import assertk.assertions.contains
@@ -8,7 +8,7 @@ import assertk.assertions.isEqualTo
 import assertk.assertions.isGreaterThan
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Test
-import org.rest4sftp.model.SimpleRemoteClient
+import com.ubertob.rest4sftp.model.SimpleRemoteClient
 import java.io.File
 
 abstract class RemoteClientTest {

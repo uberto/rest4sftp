@@ -1,7 +1,7 @@
-package unittest.org.rest4sftp.testing
+package com.ubertob.rest4sftp.testing
 
-import org.rest4sftp.model.RemoteHost
-import org.rest4sftp.model.SimpleRemoteClient
+import com.ubertob.rest4sftp.model.RemoteHost
+import com.ubertob.rest4sftp.model.SimpleRemoteClient
 import org.apache.commons.net.ftp.FTPFile
 import org.junit.jupiter.api.Assertions.assertTrue
 import java.io.InputStream

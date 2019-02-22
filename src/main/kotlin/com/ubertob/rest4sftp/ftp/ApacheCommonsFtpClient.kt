@@ -1,11 +1,11 @@
-package org.rest4sftp.ftp
+package com.ubertob.rest4sftp.ftp
 
 import org.apache.commons.net.PrintCommandListener
 import org.apache.commons.net.ftp.FTPClient
 import org.apache.commons.net.ftp.FTPFile
 import org.apache.commons.net.ftp.FTPReply
-import org.rest4sftp.model.RemoteHost
-import org.rest4sftp.model.SimpleRemoteClient
+import com.ubertob.rest4sftp.model.RemoteHost
+import com.ubertob.rest4sftp.model.SimpleRemoteClient
 import java.io.InputStream
 import java.io.PrintWriter
 import java.time.Duration

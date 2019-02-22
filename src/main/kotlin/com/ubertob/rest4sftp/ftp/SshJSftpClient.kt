@@ -1,4 +1,4 @@
-package org.rest4sftp.ftp
+package com.ubertob.rest4sftp.ftp
 
 import net.schmizz.sshj.DefaultConfig
 import net.schmizz.sshj.SSHClient
@@ -7,8 +7,8 @@ import net.schmizz.sshj.transport.verification.PromiscuousVerifier
 import net.schmizz.sshj.xfer.InMemoryDestFile
 import net.schmizz.sshj.xfer.InMemorySourceFile
 import org.apache.commons.net.ftp.FTPFile
-import org.rest4sftp.model.RemoteHost
-import org.rest4sftp.model.SimpleRemoteClient
+import com.ubertob.rest4sftp.model.RemoteHost
+import com.ubertob.rest4sftp.model.SimpleRemoteClient
 import java.io.ByteArrayOutputStream
 import java.io.InputStream
 import java.io.OutputStream

@@ -1,4 +1,4 @@
-group 'org.rest4sftp'
+group 'com.ubertob'
 version '1.0-SNAPSHOT'
 
 
@@ -60,7 +60,7 @@ test {
 applicationName = archivesBaseName
 applicationDefaultJvmArgs = ["-Dfile.encoding=UTF-8", "-Duser.timezone=UTC"]
 
-mainClassName = "org.rest4sftp.main.MainKt"
+mainClassName = "com.ubertob.rest4sftp.main.MainKt"
 
 
 dependencies{

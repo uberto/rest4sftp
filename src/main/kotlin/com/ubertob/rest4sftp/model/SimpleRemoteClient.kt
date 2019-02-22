@@ -1,4 +1,4 @@
-package org.rest4sftp.model
+package com.ubertob.rest4sftp.model
 
 import org.apache.commons.net.ftp.FTPFile
 import java.io.InputStream

@@ -1,4 +1,4 @@
-package org.rest4sftp.model
+package com.ubertob.rest4sftp.model
 
 import org.http4k.core.Status
 import java.io.InputStream

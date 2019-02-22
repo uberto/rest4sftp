@@ -1,4 +1,4 @@
-package org.rest4sftp.http
+package com.ubertob.rest4sftp.http
 
 import org.http4k.core.HttpHandler
 import org.http4k.core.Method.DELETE
@@ -11,19 +11,19 @@ import org.http4k.routing.path
 import org.http4k.routing.routes
 import org.http4k.server.Jetty
 import org.http4k.server.asServer
-import org.rest4sftp.model.Command
-import org.rest4sftp.model.CommandHandler
-import org.rest4sftp.model.CreateFolder
-import org.rest4sftp.model.DeleteFile
-import org.rest4sftp.model.DeleteFolder
-import org.rest4sftp.model.HttpResult
-import org.rest4sftp.model.InputStreamResponseBody
-import org.rest4sftp.model.JsonResponseBody
-import org.rest4sftp.model.RemoteHost
-import org.rest4sftp.model.RetrieveFile
-import org.rest4sftp.model.RetrieveFolder
-import org.rest4sftp.model.StringResponseBody
-import org.rest4sftp.model.UploadFile
+import com.ubertob.rest4sftp.model.Command
+import com.ubertob.rest4sftp.model.CommandHandler
+import com.ubertob.rest4sftp.model.CreateFolder
+import com.ubertob.rest4sftp.model.DeleteFile
+import com.ubertob.rest4sftp.model.DeleteFolder
+import com.ubertob.rest4sftp.model.HttpResult
+import com.ubertob.rest4sftp.model.InputStreamResponseBody
+import com.ubertob.rest4sftp.model.JsonResponseBody
+import com.ubertob.rest4sftp.model.RemoteHost
+import com.ubertob.rest4sftp.model.RetrieveFile
+import com.ubertob.rest4sftp.model.RetrieveFolder
+import com.ubertob.rest4sftp.model.StringResponseBody
+import com.ubertob.rest4sftp.model.UploadFile
 
 
 class RestfulServer(private val commandHandler: CommandHandler) : HttpHandler {

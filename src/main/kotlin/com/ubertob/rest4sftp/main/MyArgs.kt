@@ -1,9 +1,9 @@
-package org.rest4sftp.main
+package com.ubertob.rest4sftp.main
 
 import com.xenomachina.argparser.ArgParser
 import com.xenomachina.argparser.default
-import org.rest4sftp.main.Protocol.FTP
-import org.rest4sftp.main.Protocol.SFTP
+import com.ubertob.rest4sftp.main.Protocol.FTP
+import com.ubertob.rest4sftp.main.Protocol.SFTP
 
 class MyArgs(parser: ArgParser) {
     val v by parser.flagging("enable verbose mode")

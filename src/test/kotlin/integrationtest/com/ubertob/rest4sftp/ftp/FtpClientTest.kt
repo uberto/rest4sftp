@@ -1,8 +1,8 @@
-package integrationtest.org.rest4sftp.ftp
+package integrationtest.com.ubertob.rest4sftp.ftp
 
-import org.rest4sftp.ftp.ApacheCommonsFtpClient
-import org.rest4sftp.model.RemoteHost
-import org.rest4sftp.model.SimpleRemoteClient
+import com.ubertob.rest4sftp.ftp.ApacheCommonsFtpClient
+import com.ubertob.rest4sftp.model.RemoteHost
+import com.ubertob.rest4sftp.model.SimpleRemoteClient
 import java.time.Duration
 
 

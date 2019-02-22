@@ -1,4 +1,4 @@
-package org.rest4sftp.model
+package com.ubertob.rest4sftp.model
 
 import com.fasterxml.jackson.databind.ObjectMapper
 import org.http4k.core.Status.Companion.BAD_REQUEST

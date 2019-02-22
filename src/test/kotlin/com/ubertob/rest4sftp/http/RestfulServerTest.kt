@@ -1,7 +1,7 @@
-package unittest.org.rest4sftp.http
+package com.ubertob.rest4sftp.http
 
-import org.rest4sftp.http.RestfulServer
-import org.rest4sftp.model.CommandHandler
+import com.ubertob.rest4sftp.http.RestfulServer
+import com.ubertob.rest4sftp.model.CommandHandler
 import assertk.Assert
 import assertk.all
 import assertk.assertThat
@@ -20,7 +20,7 @@ import org.http4k.core.Status.Companion.NOT_FOUND
 import org.http4k.core.Status.Companion.OK
 import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Test
-import unittest.org.rest4sftp.testing.SpySimpleRemoteClient
+import com.ubertob.rest4sftp.testing.SpySimpleRemoteClient
 
 class RestfulServerTest {
 
