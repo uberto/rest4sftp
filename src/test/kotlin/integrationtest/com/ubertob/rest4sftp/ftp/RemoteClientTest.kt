@@ -13,6 +13,9 @@ import java.io.File
 
 abstract class RemoteClientTest {
 
+
+    val baseDir = "local-integration-test/ftp-content-root/"
+
     abstract fun createConnection(): SimpleRemoteClient
 
     @Test
@@ -39,7 +42,7 @@ abstract class RemoteClientTest {
     @Test
     fun `delete folder`() {
 
-        val deleteFolder = File("ftp-content-root/delete-folder")
+        val deleteFolder = File("${baseDir}delete-folder")
 
         deleteFolder.mkdir()
 
@@ -63,7 +66,7 @@ abstract class RemoteClientTest {
     @Test
     fun `create folder`() {
 
-        val folderToBeCreated = File("ftp-content-root/new-folder")
+        val folderToBeCreated = File("${baseDir}new-folder")
         folderToBeCreated.delete()
 
         Assertions.assertFalse(folderToBeCreated.exists())
@@ -96,7 +99,7 @@ abstract class RemoteClientTest {
 
         assertThat(fileContents.size).isGreaterThan(100)
 
-        val expectedContent = File("ftp-content-root/test-xml.xml").readText()
+        val expectedContent = File("${baseDir}test-xml.xml").readText()
 
         assertThat(String(fileContents)).isEqualTo(expectedContent)
 
@@ -115,7 +118,7 @@ abstract class RemoteClientTest {
     @Test
     fun `delete file`() {
 
-        val deleteFile = File("ftp-content-root/test-delete.xml")
+        val deleteFile = File("${baseDir}test-delete.xml")
 
         deleteFile.writeText("test")
 
@@ -138,7 +141,7 @@ abstract class RemoteClientTest {
     @Test
     fun `upload file`() {
 
-        val uploadFile = File("ftp-content-root/test-upload.xml")
+        val uploadFile = File("${baseDir}test-upload.xml")
 
         uploadFile.delete()
         Assertions.assertFalse(uploadFile.exists())
@@ -157,7 +160,7 @@ abstract class RemoteClientTest {
     @Test
     fun `upload file to non existent directory`() {
 
-        val uploadFile = File("ftp-content-root-123/test-upload.xml")
+        val uploadFile = File("${baseDir}-123/test-upload.xml")
 
         Assertions.assertFalse(uploadFile.exists())
 
