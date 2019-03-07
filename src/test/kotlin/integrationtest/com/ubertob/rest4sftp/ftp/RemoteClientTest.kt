@@ -138,7 +138,7 @@ abstract class RemoteClientTest {
     }
 
 
-//    @Test
+    @Test
     fun `rename file`() {
 
         val toBeRenamedFile = File("${baseDir}test-rename.xml")
@@ -159,7 +159,7 @@ abstract class RemoteClientTest {
     }
 
 
-//    @Test
+    @Test
     fun `upload file and rename when finish`() {
 
         val uploadFile = File("${baseDir}test-upload.xml")
@@ -192,7 +192,7 @@ abstract class RemoteClientTest {
     }
 
 
-//    @Test
+    @Test
     fun `upload file`() {
 
         val uploadFile = File("${baseDir}test-upload.xml")

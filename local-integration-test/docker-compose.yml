@@ -2,7 +2,7 @@ version: "3"
 
 services:
   ftpserver:
-    image: "stilliard/pure-ftpd:hardened"
+    image: "stilliard/pure-ftpd"
     environment:
       - FTP_USER_NAME=bob
       - FTP_USER_PASS=12345
