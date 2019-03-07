@@ -1,14 +1,13 @@
 package integrationtest.com.ubertob.rest4sftp.ftp
 
 import assertk.assertThat
-import assertk.assertions.contains
-import assertk.assertions.hasSize
-import assertk.assertions.isEmpty
-import assertk.assertions.isEqualTo
-import assertk.assertions.isGreaterThan
+import assertk.assertions.*
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Test
 import com.ubertob.rest4sftp.model.SimpleRemoteClient
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.async
+import kotlinx.coroutines.delay
 import java.io.File
 
 abstract class RemoteClientTest {
@@ -25,7 +24,7 @@ abstract class RemoteClientTest {
 
         val names = files.map { it.name }
 
-        assertThat(files.size).isEqualTo(2)
+        assertThat(files.size).isGreaterThanOrEqualTo(2)
         assertThat(names).contains("test-xml.xml")
         assertThat(names).contains("test-text.txt")
 
@@ -138,13 +137,69 @@ abstract class RemoteClientTest {
 
     }
 
-    @Test
+
+//    @Test
+    fun `rename file`() {
+
+        val toBeRenamedFile = File("${baseDir}test-rename.xml")
+        toBeRenamedFile.writeText("test")
+
+        val renameSuccess = createConnection().use {
+            it.renameFile("/upload", "test-rename.xml", "test-renamed.xml")
+        }
+        Assertions.assertTrue(renameSuccess)
+
+        val renamedFile = File("${baseDir}test-renamed.xml")
+
+        Assertions.assertTrue(renamedFile.exists())
+        Assertions.assertFalse(toBeRenamedFile.exists())
+
+        createConnection().deleteFile("/upload", "test-renamed.xml")
+
+    }
+
+
+//    @Test
+    fun `upload file and rename when finish`() {
+
+        val uploadFile = File("${baseDir}test-upload.xml")
+        val uploadTempFile = File("${baseDir}test-upload.xml.io")
+
+        uploadFile.delete()
+        uploadTempFile.delete()
+        Assertions.assertFalse(uploadFile.exists())
+
+
+        val createdTemp = GlobalScope.async {
+            while (true){
+                delay(1)
+                if (uploadTempFile.exists())
+                    break
+            }
+            true
+        }
+
+        val uploadSuccess = createConnection().use {
+            it.uploadFile("/upload", "test-upload.xml", "test".byteInputStream())
+        }
+
+        Assertions.assertTrue(uploadSuccess)
+        Assertions.assertTrue(uploadFile.exists())
+        Assertions.assertTrue(createdTemp.getCompleted())
+
+        uploadFile.delete()
+
+    }
+
+
+//    @Test
     fun `upload file`() {
 
         val uploadFile = File("${baseDir}test-upload.xml")
+        val uploadTempFile = File("${baseDir}test-upload.xml.io")
 
         uploadFile.delete()
-        Assertions.assertFalse(uploadFile.exists())
+        uploadTempFile.delete()
 
         val uploadSuccess = createConnection().use {
             it.uploadFile("/upload", "test-upload.xml", "test".byteInputStream())

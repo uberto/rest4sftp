@@ -10,7 +10,7 @@ import java.io.InputStream
 import java.io.PrintWriter
 import java.time.Duration
 
-class ApacheCommonsFtpClient(private val remoteHost: RemoteHost, val timeout: Duration) : SimpleRemoteClient {
+class ApacheCommonsFtpClient(private val remoteHost: RemoteHost, val timeout: Duration, val tempExtension: String = ".io") : SimpleRemoteClient {
 
     private val ftp = FTPClient()
 
@@ -51,8 +51,17 @@ class ApacheCommonsFtpClient(private val remoteHost: RemoteHost, val timeout: Du
         else ByteArray(0)
 
     override fun uploadFile(directoryName: String, fileName: String, upload: InputStream): Boolean =
-        ftp.changeWorkingDirectory(directoryName)
-        && ftp.storeFile(fileName, upload)
+            if (ftp.changeWorkingDirectory(directoryName)
+                    && ftp.storeFile(fileName.tempExt(), upload)) {
+                    ftp.status
+                    ftp.rename(fileName.tempExt(), fileName)
+            } else { false }
+
+
+    override fun renameFile(directoryName: String, oldFileName: String, newFileName: String): Boolean =
+            ftp.rename("$directoryName/$oldFileName", "$directoryName/$newFileName")
+
+    private fun String.tempExt() = this + tempExtension
 
     override fun deleteFile(directoryName: String, fileName: String): Boolean =
         ftp.changeWorkingDirectory(directoryName)

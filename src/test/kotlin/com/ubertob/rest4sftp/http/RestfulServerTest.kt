@@ -141,6 +141,7 @@ class RestfulServerTest {
         assertFalse(fakeFtpClient.isConnected)
     }
 
+
     @Test
     fun `can't delete a file that doesn't exist`() {
         val filePath = "folder1/file5"

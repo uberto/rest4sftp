@@ -37,6 +37,15 @@ class SpySimpleRemoteClient(val remoteHost: RemoteHost, val files: MutableMap<St
         return files[directoryName]?.add(ftpFile) ?: false
     }
 
+    override fun renameFile(directoryName: String, oldFileName: String, newFileName: String): Boolean {
+        assertTrue(isConnected)
+
+        files[directoryName]?.filter { it.name == oldFileName }?.map{
+
+            FTPFile().apply { name = newFileName; size = it.size }}
+        return files[directoryName]?.any { it.name == newFileName } ?: false
+    }
+
     override fun deleteFile(directoryName: String, fileName: String): Boolean {
         assertTrue(isConnected)
         return files[directoryName]?.removeIf { it.name == fileName } ?: false

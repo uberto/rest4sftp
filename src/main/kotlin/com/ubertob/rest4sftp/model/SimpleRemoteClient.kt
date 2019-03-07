@@ -12,4 +12,5 @@ interface SimpleRemoteClient : AutoCloseable {
     fun uploadFile(directoryName: String, fileName: String, upload: InputStream): Boolean
     fun deleteFile(directoryName: String, fileName: String): Boolean
     fun connect(): SimpleRemoteClient
+    fun renameFile(directoryName: String, oldFileName: String, newFileName: String): Boolean
 }

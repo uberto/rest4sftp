@@ -17,7 +17,6 @@ import java.time.Duration
 
 
 class SshJSftpClient(val remoteHost: RemoteHost, val timeout: Duration): SimpleRemoteClient {
-
     val sshClient = SSHClient(DefaultConfig())
 
     fun toFtpFile(rrinfo: RemoteResourceInfo): FTPFile =
@@ -56,8 +55,17 @@ class SshJSftpClient(val remoteHost: RemoteHost, val timeout: Duration): SimpleR
     override fun uploadFile(directoryName: String, fileName: String, upload: InputStream): Boolean =
         runWithNoExceptions {
             val sourceFile = InMemoryInputFile(upload)
+            val tempFileName = "$fileName.io"
             sshClient.newSFTPClient().use {
-                sftpClient -> sftpClient.put(sourceFile, directoryName slash fileName)
+                sftpClient -> sftpClient.put(sourceFile, directoryName slash tempFileName)
+                sftpClient.rename(directoryName slash tempFileName, directoryName slash fileName)
+                }
+            }
+
+    override fun renameFile(directoryName: String, oldFileName: String, newFileName: String): Boolean =
+            runWithNoExceptions {
+                sshClient.newSFTPClient().use { sftpClient ->
+                    sftpClient.rename(directoryName slash oldFileName, directoryName slash newFileName)
                 }
             }
 
