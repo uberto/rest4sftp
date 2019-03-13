@@ -5,6 +5,7 @@ apply plugin: "application"
 apply plugin: "idea"
 apply plugin: "kotlin"
 apply plugin: 'com.bmuschko.nexus'
+apply plugin: 'io.codearte.nexus-staging'
 
 ext {
     httpVersion = "4.5.3"
@@ -25,6 +26,7 @@ buildscript {
     dependencies {
         classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlinVersion"
         classpath 'com.bmuschko:gradle-nexus-plugin:2.3.1'
+        classpath "io.codearte.gradle.nexus:gradle-nexus-staging-plugin:0.20.0"
     }
 }
 
