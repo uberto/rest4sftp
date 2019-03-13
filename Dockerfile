@@ -6,7 +6,7 @@ RUN ./gradlew --no-daemon clean build
 
 FROM openjdk:8-jre-slim
 EXPOSE 8080
-COPY --from=builder /appsrc/build/distributions/rest4sftp-1.0-SNAPSHOT.tar /app/
+COPY --from=builder /appsrc/build/distributions/rest4sftp-0.8.0-SNAPSHOT.tar /app/
 WORKDIR /app
 RUN tar -xvf /app/rest4sftp-0.8.0-SNAPSHOT.tar
 ENTRYPOINT ["/app/rest4sftp-0.8.0-SNAPSHOT/bin/rest4sftp","--port","8080"]
