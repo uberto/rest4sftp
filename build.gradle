@@ -1,5 +1,5 @@
 group 'com.ubertob'
-version '1.0-SNAPSHOT'
+version '0.8.0-SNAPSHOT'
 
 
 apply plugin: "application"
@@ -13,7 +13,7 @@ ext {
     jettyVersion = "9.4.7.v20170914"
     jvmVersion = "1.8"
     slf4jVersion = "1.7.25"
-    junitVersion = '5.1.1'
+    junitVersion = '5.4.0'
     jacksonVersion = '2.9.8'
 }
 
@@ -29,7 +29,7 @@ buildscript {
 }
 
 wrapper {
-    gradleVersion = "5.1.1"
+    gradleVersion = "5.2.1"
 }
 
 sourceCompatibility = "${jvmVersion}"
@@ -54,6 +54,9 @@ compileTestKotlin {
 
 test {
     exclude 'integrationtest/**/*'
+
+    useJUnitPlatform()
+    testLogging.showStandardStreams = true
 }
 
 
