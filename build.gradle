@@ -1,4 +1,4 @@
-group 'com.ubertob'
+group 'com.github.uberto'
 version '0.8.0-SNAPSHOT'
 
 apply plugin: "application"
