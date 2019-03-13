@@ -1,11 +1,10 @@
 group 'com.ubertob'
 version '0.8.0-SNAPSHOT'
 
-
 apply plugin: "application"
 apply plugin: "idea"
 apply plugin: "kotlin"
-
+apply plugin: 'com.bmuschko.nexus'
 
 ext {
     httpVersion = "4.5.3"
@@ -25,6 +24,7 @@ buildscript {
     }
     dependencies {
         classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlinVersion"
+        classpath 'com.bmuschko:gradle-nexus-plugin:2.3.1'
     }
 }
 
@@ -87,4 +87,49 @@ dependencies{
     testCompile   "org.junit.jupiter:junit-jupiter-engine:${junitVersion}"
     testCompile   "org.junit.jupiter:junit-jupiter-params:${junitVersion}"
 
+}
+
+archivesBaseName = 'rest4sftp'
+
+modifyPom {
+    project {
+        name 'rest4sftp'
+        description 'Bridge from RESTful api to SFTP and FTP'
+        url 'https://github.com/uberto/rest4sftp'
+        inceptionYear '2019'
+        scm {
+            url 'https://github.com/uberto/rest4sftp'
+            connection 'https://github.com/uberto/rest4sftp.git'
+            developerConnection 'git@github.com:uberto/rest4sftp.git'
+        }
+        licenses {
+            license {
+                name 'The Apache Software License, Version 2.0'
+                url 'http://www.apache.org/licenses/LICENSE-2.0.txt'
+                distribution 'repo'
+            }
+        }
+        developers {
+            developer {
+                id 'UbertoBarbini'
+                name 'Uberto Barbini'
+                email 'uberto.gama@gmail.com'
+            }
+            developer {
+                id 'tompower-sn'
+                name 'Tom Power'
+                email 'tom.power@springernature.com'
+            }
+        }
+    }
+}
+extraArchive {
+    sources = true
+    tests = true
+    javadoc = true
+}
+nexus {
+    sign = true
+    repositoryUrl = 'https://oss.sonatype.org/service/local/staging/deploy/maven2/'
+    snapshotRepositoryUrl = 'https://oss.sonatype.org/content/repositories/snapshots/'
 }
