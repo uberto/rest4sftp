@@ -9,6 +9,8 @@ import net.schmizz.sshj.xfer.InMemorySourceFile
 import org.apache.commons.net.ftp.FTPFile
 import com.ubertob.rest4sftp.model.RemoteHost
 import com.ubertob.rest4sftp.model.SimpleRemoteClient
+import net.schmizz.sshj.sftp.FileMode
+import org.apache.commons.net.ftp.FTPFile.FILE_TYPE
 import java.io.ByteArrayOutputStream
 import java.io.InputStream
 import java.io.OutputStream
@@ -19,13 +21,18 @@ import java.time.Duration
 class SshJSftpClient(val remoteHost: RemoteHost, val timeout: Duration): SimpleRemoteClient {
     val sshClient = SSHClient(DefaultConfig())
 
+
     fun toFtpFile(rrinfo: RemoteResourceInfo): FTPFile =
         FTPFile().apply {
-//            setPermission(rrinfo.attributes)
+            size = rrinfo.attributes.size
+            this.type = rrinfo.attributes.type.toTypeInt()
+//            setPermission(rrinfo.attributes.permissions)
             name = rrinfo.name
+
         }
 
     override fun listFiles(directoryName: String): List<FTPFile> =
+
         runCatching {
             sshClient.newSFTPClient().use {
             sftpClient -> sftpClient.ls(directoryName).map ( ::toFtpFile )
@@ -82,6 +89,7 @@ class SshJSftpClient(val remoteHost: RemoteHost, val timeout: Duration): SimpleR
 
 
     override fun connect(): SimpleRemoteClient {
+
         sshClient.addHostKeyVerifier(PromiscuousVerifier())
         sshClient.connect(remoteHost.host, remoteHost.port)
         sshClient.authPassword(remoteHost.userName, remoteHost.password)
@@ -93,6 +101,19 @@ class SshJSftpClient(val remoteHost: RemoteHost, val timeout: Duration): SimpleR
     }
 
 }
+
+private fun FileMode.Type.toTypeInt(): Int =
+    when(this){
+        FileMode.Type.BLOCK_SPECIAL -> FTPFile.UNKNOWN_TYPE
+        FileMode.Type.CHAR_SPECIAL -> FTPFile.UNKNOWN_TYPE
+        FileMode.Type.FIFO_SPECIAL -> FTPFile.UNKNOWN_TYPE
+        FileMode.Type.SOCKET_SPECIAL -> FTPFile.UNKNOWN_TYPE
+        FileMode.Type.REGULAR -> FTPFile.FILE_TYPE
+        FileMode.Type.DIRECTORY -> FTPFile.DIRECTORY_TYPE
+        FileMode.Type.SYMLINK -> FTPFile.SYMBOLIC_LINK_TYPE
+        FileMode.Type.UNKNOWN -> FTPFile.UNKNOWN_TYPE
+    }
+
 
 private infix fun String.slash(fileName: String): String = Paths.get(this, fileName).toString()
 
