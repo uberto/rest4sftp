@@ -35,9 +35,10 @@ class RestfulServerTest {
     })
 
     private val connectionHeaders = listOf(
-        "host" to "test",
-        "user" to "test",
-        "password" to "test"
+        RestfulServer.HOST_HEADER to "server",
+        RestfulServer.PORT_HEADER to "22",
+        RestfulServer.USER_HEADER to "user",
+        RestfulServer.PWD_HEADER to "pwd"
     )
 
     @Test

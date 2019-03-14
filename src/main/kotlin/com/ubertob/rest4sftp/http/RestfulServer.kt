@@ -28,6 +28,14 @@ import com.ubertob.rest4sftp.model.UploadFile
 
 class RestfulServer(private val commandHandler: CommandHandler) : HttpHandler {
 
+    companion object {
+        val HOST_HEADER = "FTP-Host"
+        val PORT_HEADER = "FTP-Port"
+        val USER_HEADER = "FTP-User"
+        val PWD_HEADER = "FTP-Password"
+    }
+
+
     override fun invoke(request: Request): Response =
         routes(
             "/folder/{path:.*}" bind GET to { RetrieveFolder(it.path()).process(it) },
@@ -42,10 +50,10 @@ class RestfulServer(private val commandHandler: CommandHandler) : HttpHandler {
     private fun Request.toFtpHost(): RemoteHost =
         headers.toMap().let {
             RemoteHost(
-                    host = it["FTP-Host"].orEmpty(),
-                    port = it["FTP-Port"]?.toIntOrNull() ?: 21,
-                    userName = it["FTP-User"].orEmpty(),
-                    password = it["FTP-Password"].orEmpty()
+                    host = it[HOST_HEADER].orEmpty(),
+                    port = it[PORT_HEADER]?.toIntOrNull() ?: 21,
+                    userName = it[USER_HEADER].orEmpty(),
+                    password = it[PWD_HEADER].orEmpty()
             )
         }
 
