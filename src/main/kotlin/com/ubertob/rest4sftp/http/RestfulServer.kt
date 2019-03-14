@@ -42,10 +42,10 @@ class RestfulServer(private val commandHandler: CommandHandler) : HttpHandler {
     private fun Request.toFtpHost(): RemoteHost =
         headers.toMap().let {
             RemoteHost(
-                    host = it["host"].orEmpty(),
-                    port = it["port"]?.toIntOrNull() ?: 21,
-                    userName = it["user"].orEmpty(),
-                    password = it["password"].orEmpty()
+                    host = it["FTP-Host"].orEmpty(),
+                    port = it["FTP-Port"]?.toIntOrNull() ?: 21,
+                    userName = it["FTP-User"].orEmpty(),
+                    password = it["FTP-Password"].orEmpty()
             )
         }
 
