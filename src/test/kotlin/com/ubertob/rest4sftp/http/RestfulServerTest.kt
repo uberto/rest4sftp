@@ -7,6 +7,8 @@ import assertk.all
 import assertk.assertThat
 import assertk.assertions.isEqualTo
 import com.fasterxml.jackson.databind.ObjectMapper
+import com.ubertob.rest4sftp.model.FolderResponse
+import com.ubertob.rest4sftp.model.toFolderResponse
 import org.apache.commons.net.ftp.FTPFile
 import org.http4k.core.Body
 import org.http4k.core.Method.DELETE
@@ -21,12 +23,15 @@ import org.http4k.core.Status.Companion.OK
 import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Test
 import com.ubertob.rest4sftp.testing.SpySimpleRemoteClient
+import org.apache.commons.net.ftp.FTPFile.DIRECTORY_TYPE
+import org.apache.commons.net.ftp.FTPFile.FILE_TYPE
 
 class RestfulServerTest {
 
-    private val file1 = FTPFile().apply { name = "file1"; size = 123 }
-    private val file2 = FTPFile().apply { name = "file2"; size = 234 }
-    private val files = mutableMapOf("folder1" to mutableListOf(file1, file2))
+    private val file1 = FTPFile().apply { name = "file1"; size = 123; type = FILE_TYPE }
+    private val file2 = FTPFile().apply { name = "file2"; size = 234; type = FILE_TYPE }
+    private val dir1 = FTPFile().apply { name = "subFolder"; size = 0; type = DIRECTORY_TYPE }
+    private val files = mutableMapOf("folder1" to mutableListOf(file1, file2, dir1))
 
     private lateinit var fakeFtpClient: SpySimpleRemoteClient
     private val handler = RestfulServer(CommandHandler {
@@ -42,8 +47,16 @@ class RestfulServerTest {
     )
 
     @Test
+    fun `map files to folder response`() {
+        val expectedJson = ObjectMapper().writeValueAsString(files["folder1"]?.toFolderResponse())
+
+        assertThat(expectedJson).isEqualTo("""{"folders":["subFolder"],"files":["file1","file2"]}""")
+    }
+
+
+    @Test
     fun `retrieve list of all files in dir`() {
-        val expectedJson = ObjectMapper().writeValueAsString(files["folder1"])
+        val expectedJson = ObjectMapper().writeValueAsString(files["folder1"]?.toFolderResponse())
         val req = Request(GET, "/folder/folder1").headers(connectionHeaders)
 
         val response = handler(req)
@@ -57,7 +70,7 @@ class RestfulServerTest {
 
     @Test
     fun `non existent folder returns empty list`() {
-        val expectedJson = ObjectMapper().writeValueAsString(listOf<FTPFile>())
+        val expectedJson = ObjectMapper().writeValueAsString(FolderResponse(emptyList(), emptyList()))
         val req = Request(GET, "/folder/folder3").headers(connectionHeaders)
 
         val response = handler(req)

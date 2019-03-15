@@ -1,6 +1,7 @@
 package com.ubertob.rest4sftp.model
 
 import com.fasterxml.jackson.databind.ObjectMapper
+import org.apache.commons.net.ftp.FTPFile
 import org.http4k.core.Status.Companion.BAD_REQUEST
 import org.http4k.core.Status.Companion.NOT_FOUND
 import org.http4k.core.Status.Companion.OK
@@ -40,7 +41,7 @@ class CommandHandler(internal val ftpClientFactory: SimpleFtpClientFactory) {
         }
         is RetrieveFolder -> {
             val listFiles = remoteHost.execute { listFiles(cmd.path) }
-            val json = jsonMapper.writeValueAsString(listFiles)
+            val json = jsonMapper.writeValueAsString(listFiles.toFolderResponse())
             HttpResult(OK, JsonResponseBody(json))
         }
         is DeleteFolder -> {
@@ -60,3 +61,4 @@ class CommandHandler(internal val ftpClientFactory: SimpleFtpClientFactory) {
     private fun <T> RemoteHost.execute(block: SimpleRemoteClient.() -> T): T = ftpClientFactory(this).connect().use(block)
 
 }
+
