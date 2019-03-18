@@ -50,10 +50,10 @@ class RestfulServer(private val commandHandler: CommandHandler) : HttpHandler {
     private fun Request.toFtpHost(): RemoteHost =
         headers.toMap().let {
             RemoteHost(
-                    host = it[HOST_HEADER].orEmpty(),
-                    port = it[PORT_HEADER]?.toIntOrNull() ?: 21,
-                    userName = it[USER_HEADER].orEmpty(),
-                    password = it[PWD_HEADER].orEmpty()
+                    host = it[HOST_HEADER] ?: throw IllegalStateException("FTP host not configured in headers"),
+                    port = it[PORT_HEADER]?.toInt() ?: throw IllegalStateException("FTP port not configured in headers"),
+                    userName = it[USER_HEADER] ?: throw IllegalStateException("FTP username not configured in headers"),
+                    password = it[PWD_HEADER] ?: throw IllegalStateException("FTP password not configured in headers")
             )
         }
 
