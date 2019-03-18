@@ -1,25 +1,26 @@
 package com.ubertob.rest4sftp.ftp
 
+import com.ubertob.rest4sftp.model.CommandHandler
+import com.ubertob.rest4sftp.model.RemoteHost
+import com.ubertob.rest4sftp.model.SimpleRemoteClient
 import net.schmizz.sshj.DefaultConfig
 import net.schmizz.sshj.SSHClient
+import net.schmizz.sshj.sftp.FileMode
 import net.schmizz.sshj.sftp.RemoteResourceInfo
 import net.schmizz.sshj.transport.verification.PromiscuousVerifier
 import net.schmizz.sshj.xfer.InMemoryDestFile
 import net.schmizz.sshj.xfer.InMemorySourceFile
 import org.apache.commons.net.ftp.FTPFile
-import com.ubertob.rest4sftp.model.RemoteHost
-import com.ubertob.rest4sftp.model.SimpleRemoteClient
-import net.schmizz.sshj.sftp.FileMode
-import org.apache.commons.net.ftp.FTPFile.FILE_TYPE
 import java.io.ByteArrayOutputStream
 import java.io.InputStream
 import java.io.OutputStream
 import java.nio.file.Paths
 import java.time.Duration
+import java.util.logging.Logger
 
 
-class SshJSftpClient(val remoteHost: RemoteHost, val timeout: Duration): SimpleRemoteClient {
-    val sshClient = SSHClient(DefaultConfig())
+class SshJSftpClient(private val remoteHost: RemoteHost, private val timeout: Duration): SimpleRemoteClient {
+    private val sshClient = SSHClient(DefaultConfig())
 
 
     fun toFtpFile(rrinfo: RemoteResourceInfo): FTPFile =
@@ -35,20 +36,30 @@ class SshJSftpClient(val remoteHost: RemoteHost, val timeout: Duration): SimpleR
 
         runCatching {
             sshClient.newSFTPClient().use {
-            sftpClient -> sftpClient.ls(directoryName).map ( ::toFtpFile )
-        }}.getOrDefault(emptyList())
+                sftpClient -> sftpClient.ls(directoryName).map ( ::toFtpFile )
+            }
+        }.getOrDefault(emptyList())
+        .also {
+            logger.info("GET -> ${remoteHost.userName}@${remoteHost.host}:${remoteHost.port}/$directoryName/ <- ${it.size} items")
+        }
 
     override fun createFolder(directoryName: String): Boolean =
         runWithNoExceptions {
             sshClient.newSFTPClient().use {
             sftpClient -> sftpClient.mkdir(directoryName)
-            } }
+            }
+        }.also {
+            logger.info("CREATE -> ${remoteHost.userName}@${remoteHost.host}:${remoteHost.port}/$directoryName/ <- $it")
+        }
 
     override fun deleteFolder(directoryName: String): Boolean =
         runWithNoExceptions {
             sshClient.newSFTPClient().use { sftpClient ->
                 sftpClient.rmdir(directoryName)
-            } }
+            }
+        }.also {
+            logger.info("DELETE -> ${remoteHost.userName}@${remoteHost.host}:${remoteHost.port}/$directoryName/ <- $it")
+        }
 
     override fun retrieveFile(directoryName: String, fileName: String): ByteArray =
         runCatching {
@@ -58,6 +69,9 @@ class SshJSftpClient(val remoteHost: RemoteHost, val timeout: Duration): SimpleR
                 }
             }.outputStream.toByteArray()
         }.getOrDefault(ByteArray(0))
+        .also {
+            logger.info("GET -> ${remoteHost.userName}@${remoteHost.host}:${remoteHost.port}/$directoryName/$fileName <- ${it.size}bytes")
+        }
 
     override fun uploadFile(directoryName: String, fileName: String, upload: InputStream): Boolean =
         runWithNoExceptions {
@@ -66,14 +80,18 @@ class SshJSftpClient(val remoteHost: RemoteHost, val timeout: Duration): SimpleR
             sshClient.newSFTPClient().use {
                 sftpClient -> sftpClient.put(sourceFile, directoryName slash tempFileName)
                 sftpClient.rename(directoryName slash tempFileName, directoryName slash fileName)
-                }
             }
+        }.also {
+            logger.info("UPLOAD -> ${remoteHost.userName}@${remoteHost.host}:${remoteHost.port}/$directoryName/$fileName <- $it")
+        }
 
     override fun renameFile(directoryName: String, oldFileName: String, newFileName: String): Boolean =
             runWithNoExceptions {
                 sshClient.newSFTPClient().use { sftpClient ->
                     sftpClient.rename(directoryName slash oldFileName, directoryName slash newFileName)
                 }
+            }.also {
+                logger.info("RENAME -> ${remoteHost.userName}@${remoteHost.host}:${remoteHost.port}/$directoryName/$oldFileName to $newFileName <- $it")
             }
 
 
@@ -82,6 +100,8 @@ class SshJSftpClient(val remoteHost: RemoteHost, val timeout: Duration): SimpleR
              sshClient.newSFTPClient().use { sftpClient ->
                  sftpClient.rm(directoryName slash fileName)
              }
+         }.also {
+             logger.info("DELETE -> ${remoteHost.userName}@${remoteHost.host}:${remoteHost.port}/$directoryName/$fileName <- $it")
          }
 
     private fun runWithNoExceptions(block: () -> Unit): Boolean =
@@ -90,6 +110,7 @@ class SshJSftpClient(val remoteHost: RemoteHost, val timeout: Duration): SimpleR
 
     override fun connect(): SimpleRemoteClient {
 
+        logger.info("CONNECT -> ${remoteHost.userName}@${remoteHost.host}:${remoteHost.port}")
         sshClient.addHostKeyVerifier(PromiscuousVerifier())
         sshClient.connect(remoteHost.host, remoteHost.port)
         sshClient.authPassword(remoteHost.userName, remoteHost.password)
@@ -100,6 +121,9 @@ class SshJSftpClient(val remoteHost: RemoteHost, val timeout: Duration): SimpleR
         sshClient.close()
     }
 
+    companion object {
+        val logger: Logger = Logger.getLogger(CommandHandler::class.java.name)
+    }
 }
 
 private fun FileMode.Type.toTypeInt(): Int =

@@ -83,6 +83,9 @@ dependencies{
     compile 'commons-net:commons-net:3.6'
     compile 'com.hierynomus:sshj:0.27.0'
 
+    compile "org.slf4j:slf4j-simple:${slf4jVersion}"
+    compile "org.slf4j:slf4j-api:${slf4jVersion}"
+
 
     testCompile   'com.willowtreeapps.assertk:assertk-jvm:0.13'
     testCompile   "org.junit.jupiter:junit-jupiter-api:${junitVersion}"
