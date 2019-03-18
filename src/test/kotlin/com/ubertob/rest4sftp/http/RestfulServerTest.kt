@@ -1,6 +1,5 @@
 package com.ubertob.rest4sftp.http
 
-import com.ubertob.rest4sftp.http.RestfulServer
 import com.ubertob.rest4sftp.model.CommandHandler
 import assertk.Assert
 import assertk.all
@@ -50,7 +49,7 @@ class RestfulServerTest {
     fun `map files to folder response`() {
         val expectedJson = ObjectMapper().writeValueAsString(files["folder1"]?.toFolderResponse())
 
-        assertThat(expectedJson).isEqualTo("""{"folders":["subFolder"],"files":["file1","file2"]}""")
+        assertThat(expectedJson).isEqualTo("""{"folders":[{"name":"subFolder"}],"files":[{"name":"file1"},{"name":"file2"}]}""")
     }
 
 
