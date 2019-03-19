@@ -1,29 +1,28 @@
 package com.ubertob.rest4sftp.http
 
-import com.ubertob.rest4sftp.model.CommandHandler
 import assertk.Assert
 import assertk.all
 import assertk.assertThat
 import assertk.assertions.isEqualTo
 import com.fasterxml.jackson.databind.ObjectMapper
+import com.ubertob.rest4sftp.model.CommandHandler
 import com.ubertob.rest4sftp.model.FolderResponse
 import com.ubertob.rest4sftp.model.toFolderResponse
+import com.ubertob.rest4sftp.testing.SpySimpleRemoteClient
 import org.apache.commons.net.ftp.FTPFile
+import org.apache.commons.net.ftp.FTPFile.DIRECTORY_TYPE
+import org.apache.commons.net.ftp.FTPFile.FILE_TYPE
 import org.http4k.core.Body
-import org.http4k.core.Method.DELETE
-import org.http4k.core.Method.GET
-import org.http4k.core.Method.PUT
+import org.http4k.core.Method.*
 import org.http4k.core.Request
 import org.http4k.core.Response
 import org.http4k.core.Status
 import org.http4k.core.Status.Companion.BAD_REQUEST
 import org.http4k.core.Status.Companion.NOT_FOUND
 import org.http4k.core.Status.Companion.OK
+import org.http4k.core.Status.Companion.UNAUTHORIZED
 import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Test
-import com.ubertob.rest4sftp.testing.SpySimpleRemoteClient
-import org.apache.commons.net.ftp.FTPFile.DIRECTORY_TYPE
-import org.apache.commons.net.ftp.FTPFile.FILE_TYPE
 
 class RestfulServerTest {
 
@@ -39,10 +38,10 @@ class RestfulServerTest {
     })
 
     private val connectionHeaders = listOf(
-        RestfulServer.HOST_HEADER to "server",
-        RestfulServer.PORT_HEADER to "22",
-        RestfulServer.USER_HEADER to "user",
-        RestfulServer.PWD_HEADER to "pwd"
+            RestfulServer.HOST_HEADER to "server",
+            RestfulServer.PORT_HEADER to "22",
+            RestfulServer.USER_HEADER to "user",
+            RestfulServer.PWD_HEADER to "pwd"
     )
 
     @Test
@@ -190,6 +189,14 @@ class RestfulServerTest {
             hasBody("could not upload: $filePath")
         }
         assertFalse(fakeFtpClient.isConnected)
+    }
+
+    @Test
+    fun `returns unauthorised if authorisation headers not present`() {
+        val getWithoutAuth = Request(GET, "/file/folder1/file1")
+        assertThat(handler(getWithoutAuth)).all {
+            hasStatus(UNAUTHORIZED)
+        }
     }
 
     fun Assert<Response>.hasStatus(expected: Status) {

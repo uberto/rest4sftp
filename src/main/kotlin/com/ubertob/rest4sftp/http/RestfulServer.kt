@@ -24,6 +24,7 @@ import com.ubertob.rest4sftp.model.RetrieveFile
 import com.ubertob.rest4sftp.model.RetrieveFolder
 import com.ubertob.rest4sftp.model.StringResponseBody
 import com.ubertob.rest4sftp.model.UploadFile
+import org.http4k.core.Status
 
 
 class RestfulServer(private val commandHandler: CommandHandler) : HttpHandler {
@@ -48,16 +49,19 @@ class RestfulServer(private val commandHandler: CommandHandler) : HttpHandler {
 
 
     private fun Request.toFtpHost(): RemoteHost =
-        headers.toMap().let {
             RemoteHost(
-                    host = it[HOST_HEADER] ?: throw IllegalStateException("FTP host not configured in headers"),
-                    port = it[PORT_HEADER]?.toInt() ?: throw IllegalStateException("FTP port not configured in headers"),
-                    userName = it[USER_HEADER] ?: throw IllegalStateException("FTP username not configured in headers"),
-                    password = it[PWD_HEADER] ?: throw IllegalStateException("FTP password not configured in headers")
+                    host = header(HOST_HEADER) ?: throw IllegalStateException("FTP host not configured in headers"),
+                    port = header(PORT_HEADER)?.toInt() ?: throw IllegalStateException("FTP port not configured in headers"),
+                    userName = header(USER_HEADER) ?: throw IllegalStateException("FTP username not configured in headers"),
+                    password = header(PWD_HEADER) ?: throw IllegalStateException("FTP password not configured in headers")
             )
-        }
 
-    private fun Command.process(req: Request): Response = commandHandler.handle(req.toFtpHost(), this).toResponse()
+    private fun Command.process(req: Request): Response =
+            try {
+                commandHandler.handle(req.toFtpHost(), this).toResponse()
+            } catch (e: IllegalStateException) {
+                Response(Status.UNAUTHORIZED).body(e.message.orEmpty())
+            }
 
     private fun HttpResult.toResponse() = when (val body = this.responseBody) {
         is StringResponseBody -> Response(this.status).body(body.asString).header("Content-Type", "text/plain")
