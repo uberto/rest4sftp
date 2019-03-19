@@ -1,13 +1,18 @@
 package integrationtest.com.ubertob.rest4sftp.ftp
 
 import assertk.assertThat
-import assertk.assertions.*
-import org.junit.jupiter.api.Assertions
-import org.junit.jupiter.api.Test
+import assertk.assertions.contains
+import assertk.assertions.hasSize
+import assertk.assertions.isEmpty
+import assertk.assertions.isEqualTo
+import assertk.assertions.isGreaterThan
+import assertk.assertions.isGreaterThanOrEqualTo
 import com.ubertob.rest4sftp.model.SimpleRemoteClient
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.async
 import kotlinx.coroutines.delay
+import org.junit.jupiter.api.Assertions
+import org.junit.jupiter.api.Test
 import java.io.File
 
 abstract class RemoteClientTest {
@@ -90,7 +95,7 @@ abstract class RemoteClientTest {
     }
 
     @Test
-    fun `retrieve the content of a file`() {
+    fun `retrieve the content of a text file`() {
 
         val fileContents: ByteArray = createConnection().use {
             it.retrieveFile("/upload", "test-xml.xml")
@@ -101,7 +106,20 @@ abstract class RemoteClientTest {
         val expectedContent = File("${baseDir}test-xml.xml").readText()
 
         assertThat(String(fileContents)).isEqualTo(expectedContent)
+    }
 
+    @Test
+    fun `retrieve the content of a binary file`() {
+
+        val fileContents: ByteArray = createConnection().use {
+            it.retrieveFile("/upload", "test.zip")
+        }
+
+        assertThat(fileContents.size).isGreaterThan(100)
+
+        val expectedContent = File("${baseDir}test.zip").readBytes()
+
+        assertThat(fileContents).isEqualTo(expectedContent)
     }
 
     @Test
