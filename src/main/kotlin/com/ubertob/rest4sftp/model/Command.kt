@@ -1,7 +1,6 @@
 package com.ubertob.rest4sftp.model
 
 import com.fasterxml.jackson.databind.ObjectMapper
-import org.apache.commons.net.ftp.FTPFile
 import org.http4k.core.Status.Companion.BAD_REQUEST
 import org.http4k.core.Status.Companion.NOT_FOUND
 import org.http4k.core.Status.Companion.OK
@@ -36,8 +35,9 @@ class CommandHandler(internal val ftpClientFactory: SimpleFtpClientFactory) {
                 HttpResult(BAD_REQUEST, StringResponseBody("could not upload: ${cmd.path}/${cmd.fileName}"))
         }
         is RetrieveFile -> {
-            val retrieveFile = remoteHost.execute { retrieveFile(cmd.path, cmd.fileName) }
-            HttpResult(OK, InputStreamResponseBody(retrieveFile.inputStream()))
+            remoteHost.execute { retrieveFile(cmd.path, cmd.fileName) }
+                    ?.let { HttpResult(OK, InputStreamResponseBody(it.inputStream())) }
+                    ?: HttpResult(NOT_FOUND, StringResponseBody(""))
         }
         is RetrieveFolder -> {
             remoteHost.execute { listFiles(cmd.path) }?.let { listFiles ->

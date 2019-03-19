@@ -93,39 +93,39 @@ abstract class RemoteClientTest {
     @Test
     fun `retrieve the content of a text file`() {
 
-        val fileContents: ByteArray = createConnection().use {
+        val fileContents = createConnection().use {
             it.retrieveFile("/upload", "test-xml.xml")
         }
 
-        assertThat(fileContents.size).isGreaterThan(100)
+        assertThat(fileContents?.size).isNotNull().isGreaterThan(100)
 
         val expectedContent = File("${baseDir}test-xml.xml").readText()
 
-        assertThat(String(fileContents)).isEqualTo(expectedContent)
+        assertThat(String(fileContents!!)).isEqualTo(expectedContent)
     }
 
     @Test
     fun `retrieve the content of a binary file`() {
 
-        val fileContents: ByteArray = createConnection().use {
+        val fileContents = createConnection().use {
             it.retrieveFile("/upload", "test.zip")
         }
 
-        assertThat(fileContents.size).isGreaterThan(100)
+        assertThat(fileContents?.size).isNotNull().isGreaterThan(100)
 
         val expectedContent = File("${baseDir}test.zip").readBytes()
 
-        assertThat(fileContents).isEqualTo(expectedContent)
+        assertThat(fileContents!!).isEqualTo(expectedContent)
     }
 
     @Test
-    fun `retrieve empty content from file in non existent folder`() {
+    fun `retrieve nothing for file in non existent folder`() {
 
-        val fileContents: ByteArray = createConnection().use {
+        val fileContents = createConnection().use {
             it.retrieveFile("/upload1", "test-xml.xml")
         }
 
-        assertThat(fileContents).hasSize(0)
+        assertThat(fileContents).isNull()
     }
 
     @Test

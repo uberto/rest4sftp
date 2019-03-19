@@ -127,10 +127,20 @@ class RestfulServerTest {
     }
 
     @Test
+    fun `non-existent file returns not found`() {
+        val req = Request(GET, "/file/folder1/unknown").headers(connectionHeaders)
+        val response = handler(req)
+
+        assertThat(response).all {
+            hasStatus(NOT_FOUND)
+        }
+        assertFalse(fakeFtpClient.isConnected)
+    }
+
+    @Test
     fun `retrieve the content of a file`() {
         val req = Request(GET, "/file/folder1/file1").headers(connectionHeaders)
         val response = handler(req)
-
 
         assertThat(response).all {
             hasStatus(OK)

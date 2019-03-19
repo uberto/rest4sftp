@@ -43,12 +43,12 @@ class ApacheCommonsFtpClient(private val remoteHost: RemoteHost, val timeout: Du
 
     override fun deleteFolder(directoryName: String): Boolean = ftp.removeDirectory(directoryName)
 
-    override fun retrieveFile(directoryName: String, fileName: String): ByteArray =
+    override fun retrieveFile(directoryName: String, fileName: String): ByteArray? =
         if (ftp.changeWorkingDirectory(directoryName))
             ftp.retrieveFileStream(fileName)?.use {
                 it.readBytes()
-            } ?: ByteArray(0)
-        else ByteArray(0)
+            }
+        else null
 
     override fun uploadFile(directoryName: String, fileName: String, upload: InputStream): Boolean =
             if (ftp.changeWorkingDirectory(directoryName)

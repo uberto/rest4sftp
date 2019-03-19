@@ -61,16 +61,16 @@ class SshJSftpClient(private val remoteHost: RemoteHost, private val timeout: Du
             logger.info("DELETE -> ${remoteHost.userName}@${remoteHost.host}:${remoteHost.port}/$directoryName/ <- $it")
         }
 
-    override fun retrieveFile(directoryName: String, fileName: String): ByteArray =
+    override fun retrieveFile(directoryName: String, fileName: String): ByteArray? =
         runCatching {
             InMemoryOutputFile().also {
                 sshClient.newSFTPClient().use { sftpClient ->
                     sftpClient.get(directoryName slash fileName, it)
                 }
             }.outputStream.toByteArray()
-        }.getOrDefault(ByteArray(0))
+        }.getOrNull()
         .also {
-            logger.info("GET -> ${remoteHost.userName}@${remoteHost.host}:${remoteHost.port}/$directoryName/$fileName <- ${it.size}bytes")
+            logger.info("GET -> ${remoteHost.userName}@${remoteHost.host}:${remoteHost.port}/$directoryName/$fileName <- ${it?.size ?: "null"} bytes")
         }
 
     override fun uploadFile(directoryName: String, fileName: String, upload: InputStream): Boolean =
