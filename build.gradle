@@ -61,6 +61,13 @@ test {
     testLogging.showStandardStreams = true
 }
 
+task integrationTest(type: Test) {
+    include 'integrationtest/**/*'
+
+    useJUnitPlatform()
+    testLogging.showStandardStreams = true
+}
+
 
 applicationName = archivesBaseName
 applicationDefaultJvmArgs = ["-Dfile.encoding=UTF-8", "-Duser.timezone=UTC"]

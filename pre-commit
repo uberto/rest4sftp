@@ -1,0 +1,11 @@
+#!/usr/bin/env bash
+
+readonly BASE_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+
+# Build and test the app
+(
+    cd "${BASE_DIR}"
+    ./local-integration-test/start_servers.sh
+    ./gradlew clean build && ./gradlew :integrationTest
+    ./local-integration-test/stop_servers.sh
+)
