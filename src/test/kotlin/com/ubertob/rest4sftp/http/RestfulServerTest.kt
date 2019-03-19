@@ -67,14 +67,12 @@ class RestfulServerTest {
     }
 
     @Test
-    fun `non existent folder returns empty list`() {
-        val expectedJson = ObjectMapper().writeValueAsString(FolderResponse(emptyList(), emptyList()))
+    fun `non existent folder returns not found`() {
         val req = Request(GET, "/folder/folder3").headers(connectionHeaders)
 
         val response = handler(req)
         assertThat(response).all {
-            hasStatus(OK)
-            hasBody(expectedJson)
+            hasStatus(NOT_FOUND)
         }
         assertFalse(fakeFtpClient.isConnected)
     }

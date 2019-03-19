@@ -5,7 +5,7 @@ import java.io.InputStream
 
 interface SimpleRemoteClient : AutoCloseable {
 
-    fun listFiles(directoryName: String): List<FTPFile>
+    fun listFiles(directoryName: String): List<FTPFile>?
     fun createFolder(directoryName: String): Boolean
     fun deleteFolder(directoryName: String): Boolean
     fun retrieveFile(directoryName: String, fileName: String): ByteArray

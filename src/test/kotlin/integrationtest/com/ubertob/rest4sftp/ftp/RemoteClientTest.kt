@@ -1,12 +1,8 @@
 package integrationtest.com.ubertob.rest4sftp.ftp
 
 import assertk.assertThat
-import assertk.assertions.contains
-import assertk.assertions.hasSize
-import assertk.assertions.isEmpty
-import assertk.assertions.isEqualTo
-import assertk.assertions.isGreaterThan
-import assertk.assertions.isGreaterThanOrEqualTo
+import assertk.assertions.*
+import assertk.fail
 import com.ubertob.rest4sftp.model.SimpleRemoteClient
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.async
@@ -27,7 +23,7 @@ abstract class RemoteClientTest {
 
         val files = createConnection().use { it.listFiles("/upload") }
 
-        val names = files.map { it.name }
+        val names = files?.map { it.name } ?: fail("retrieve failed")
 
         assertThat(files.size).isGreaterThanOrEqualTo(2)
         assertThat(names).contains("test-xml.xml")
@@ -36,11 +32,11 @@ abstract class RemoteClientTest {
     }
 
     @Test
-    fun `retrieve empty list from non existent dir`() {
+    fun `retrieves nothing from non existent dir`() {
 
         val files = createConnection().use { it.listFiles("/upload123") }
 
-        assertThat(files).isEmpty()
+        assertThat(files).isNull()
     }
 
     @Test

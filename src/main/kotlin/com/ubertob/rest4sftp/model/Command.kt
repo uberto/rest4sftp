@@ -40,9 +40,10 @@ class CommandHandler(internal val ftpClientFactory: SimpleFtpClientFactory) {
             HttpResult(OK, InputStreamResponseBody(retrieveFile.inputStream()))
         }
         is RetrieveFolder -> {
-            val listFiles = remoteHost.execute { listFiles(cmd.path) }
-            val json = jsonMapper.writeValueAsString(listFiles.toFolderResponse())
-            HttpResult(OK, JsonResponseBody(json))
+            remoteHost.execute { listFiles(cmd.path) }?.let { listFiles ->
+                val json = jsonMapper.writeValueAsString(listFiles.toFolderResponse())
+                HttpResult(OK, JsonResponseBody(json))
+            } ?: HttpResult(NOT_FOUND, StringResponseBody(""))
         }
         is DeleteFolder -> {
             if (remoteHost.execute { deleteFolder(cmd.path) })

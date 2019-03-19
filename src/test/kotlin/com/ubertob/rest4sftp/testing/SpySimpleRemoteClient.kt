@@ -19,9 +19,9 @@ class SpySimpleRemoteClient(val remoteHost: RemoteHost, val files: MutableMap<St
 
     var isConnected: Boolean = false
 
-    override fun listFiles(directoryName: String): List<FTPFile> {
+    override fun listFiles(directoryName: String): List<FTPFile>? {
         assertTrue(isConnected)
-        return files[directoryName] ?: emptyList()
+        return files[directoryName]
     }
 
     override fun retrieveFile(directoryName: String, fileName: String): ByteArray {

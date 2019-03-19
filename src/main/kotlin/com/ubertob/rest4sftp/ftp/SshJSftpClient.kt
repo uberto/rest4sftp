@@ -32,15 +32,15 @@ class SshJSftpClient(private val remoteHost: RemoteHost, private val timeout: Du
 
         }
 
-    override fun listFiles(directoryName: String): List<FTPFile> =
+    override fun listFiles(directoryName: String): List<FTPFile>? =
 
         runCatching {
             sshClient.newSFTPClient().use {
                 sftpClient -> sftpClient.ls(directoryName).map ( ::toFtpFile )
             }
-        }.getOrDefault(emptyList())
+        }.getOrNull()
         .also {
-            logger.info("GET -> ${remoteHost.userName}@${remoteHost.host}:${remoteHost.port}/$directoryName/ <- ${it.size} items")
+            logger.info("GET -> ${remoteHost.userName}@${remoteHost.host}:${remoteHost.port}/$directoryName/ <- ${it?.size ?: "null"} items")
         }
 
     override fun createFolder(directoryName: String): Boolean =

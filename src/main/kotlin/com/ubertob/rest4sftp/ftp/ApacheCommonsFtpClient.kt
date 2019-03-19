@@ -34,10 +34,10 @@ class ApacheCommonsFtpClient(private val remoteHost: RemoteHost, val timeout: Du
         }
     }
 
-    override fun listFiles(directoryName: String): List<FTPFile> =
+    override fun listFiles(directoryName: String): List<FTPFile>? =
         if (ftp.changeWorkingDirectory(directoryName))
             ftp.listFiles().toList()
-        else emptyList()
+        else null
 
     override fun createFolder(directoryName: String): Boolean = ftp.makeDirectory(directoryName)
 
