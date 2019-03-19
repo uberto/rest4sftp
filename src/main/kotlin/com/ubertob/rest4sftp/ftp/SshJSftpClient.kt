@@ -128,6 +128,9 @@ class SshJSftpClient(private val remoteHost: RemoteHost, private val timeout: Du
         return this
     }
 
+    override fun isConnected(): Boolean =
+        sshClient.isConnected
+
     override fun close() {
         sshClient.close()
     }
