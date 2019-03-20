@@ -176,6 +176,18 @@ class RestfulServerTest {
     }
 
     @Test
+    fun `can update a file that already exists`() {
+        val filePath = "folder1/file1"
+        val update = Request(PUT, "/file/$filePath").headers(connectionHeaders)
+
+        assertThat(handler(update)).all {
+            hasStatus(OK)
+        }
+
+        assertFalse(fakeFtpClient.isConnected)
+    }
+
+    @Test
     fun `upload a file`() {
         val filePath = "folder1/file1"
         val upload = Request(PUT, "/file/$filePath").headers(connectionHeaders).body(Body("test".byteInputStream()))

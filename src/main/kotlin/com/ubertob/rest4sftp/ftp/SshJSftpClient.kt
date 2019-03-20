@@ -79,6 +79,9 @@ class SshJSftpClient(private val remoteHost: RemoteHost, private val timeout: Du
             val tempFileName = "$fileName.io"
             sshClient.newSFTPClient().use {
                 sftpClient -> sftpClient.put(sourceFile, directoryName slash tempFileName)
+                sftpClient.statExistence(directoryName slash  fileName)?.let {
+                    sftpClient.rm(directoryName slash  fileName)
+                }
                 sftpClient.rename(directoryName slash tempFileName, directoryName slash fileName)
             }
         }.also {

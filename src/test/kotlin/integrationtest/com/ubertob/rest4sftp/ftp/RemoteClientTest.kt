@@ -185,7 +185,7 @@ abstract class RemoteClientTest {
 
 
         val createdTemp = GlobalScope.async {
-            while (true){
+            while (true) {
                 delay(1)
                 if (uploadTempFile.exists())
                     break
@@ -207,7 +207,7 @@ abstract class RemoteClientTest {
 
 
     @Test
-    fun `upload file`() {
+    fun `upload new file`() {
 
         val uploadFile = File("${baseDir}test-upload.xml")
         val uploadTempFile = File("${baseDir}test-upload.xml.io")
@@ -224,6 +224,34 @@ abstract class RemoteClientTest {
 
         uploadFile.delete()
 
+    }
+
+    @Test
+    fun `upload updated existing file`() {
+
+        val uploadFile = File("${baseDir}test-upload.xml")
+        val uploadTempFile = File("${baseDir}test-upload.xml.io")
+
+        uploadFile.delete()
+        uploadTempFile.delete()
+
+        Assertions.assertTrue(
+                createConnection().use {
+                    it.uploadFile("/upload", "test-upload.xml", "test".byteInputStream())
+                }
+        )
+
+        Assertions.assertTrue(uploadFile.exists())
+
+        Assertions.assertTrue(
+                createConnection().use {
+                    it.uploadFile("/upload", "test-upload.xml", "updated".byteInputStream())
+                }
+        )
+
+        assertThat(uploadFile.readText()).isEqualTo("updated")
+
+        uploadFile.delete()
     }
 
     @Test
