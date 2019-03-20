@@ -1,9 +1,8 @@
-package integrationtest.com.ubertob.rest4sftp.http
+package com.ubertob.rest4sftp.http
 
 import assertk.assertThat
 import assertk.assertions.isEqualTo
 import assertk.fail
-import com.ubertob.rest4sftp.http.RestfulServer
 import com.ubertob.rest4sftp.model.CommandHandler
 import com.ubertob.rest4sftp.model.SimpleFtpClientFactory
 import org.apache.http.HttpHeaders

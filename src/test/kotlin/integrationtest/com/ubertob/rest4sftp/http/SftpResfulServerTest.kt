@@ -1,6 +1,7 @@
 package integrationtest.com.ubertob.rest4sftp.http
 
 import com.ubertob.rest4sftp.ftp.SshJSftpClient
+import com.ubertob.rest4sftp.http.RestfulServerContract
 import com.ubertob.rest4sftp.model.SimpleFtpClientFactory
 import java.time.Duration
 

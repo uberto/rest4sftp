@@ -1,25 +1,10 @@
-package integrationtest.com.ubertob.rest4sftp.http
+package com.ubertob.rest4sftp.testing
 
 import com.ubertob.rest4sftp.http.UnauthorisedException
 import com.ubertob.rest4sftp.model.RemoteHost
-import com.ubertob.rest4sftp.model.SimpleFtpClientFactory
 import com.ubertob.rest4sftp.model.SimpleRemoteClient
 import org.apache.commons.net.ftp.FTPFile
 import java.io.InputStream
-
-class SimpleRestfulServerTest : RestfulServerContract() {
-
-    private val directories = mutableListOf("/upload")
-    private val files = mutableMapOf<String, ByteArray>()
-
-
-    override val ftpHost: String = "fake"
-    override val ftpPort: Int = 21
-    override val ftpUser: String = "fake"
-    override val ftpPassword: String = "fake"
-
-    override val ftpClientFactory: SimpleFtpClientFactory = { remoteHost -> FakeFtpClient(remoteHost, directories, files) }
-}
 
 class FakeFtpClient(
         private val remoteHost: RemoteHost,
@@ -73,6 +58,6 @@ class FakeFtpClient(
                     ?: false
 
     override fun close() = Unit
-}
 
-private fun String.withLeadingSlash() = if (startsWith('/')) this else "/$this"
+    private fun String.withLeadingSlash() = if (startsWith('/')) this else "/$this"
+}
