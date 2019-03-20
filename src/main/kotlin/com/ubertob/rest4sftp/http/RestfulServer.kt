@@ -66,7 +66,7 @@ class RestfulServer(private val commandHandler: CommandHandler) : HttpHandler {
     private fun HttpResult.toResponse() = when (val body = this.responseBody) {
         is StringResponseBody -> Response(this.status).body(body.asString).header("Content-Type", "text/plain")
         is InputStreamResponseBody -> Response(this.status).body(body.asInputStream).header("Content-Type", "application/octet-stream")
-        is JsonResponseBody -> Response(this.status).body(body.asJson).header("Content-Type", "application/json")
+        is JsonResponseBody -> Response(this.status).body(body.asJson).header("Content-Type", "application/json; charset=utf-8")
     }
 
     private fun Request.path() = path("path").orEmpty()

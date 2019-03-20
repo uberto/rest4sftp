@@ -73,7 +73,7 @@ abstract class RestfulServerContract {
         val request = Request(Method.GET, "/folder/upload").withAuthentication()
         val response = service.invoke(request)
         assertThat(response.status).isEqualTo(Status.OK)
-        assertThat(response.contentType).isEqualTo(ContentType.APPLICATION_JSON.value)
+        assertThat(response.contentType).isEqualTo(ContentType.APPLICATION_JSON.toHeaderValue())
     }
 
     @Test
