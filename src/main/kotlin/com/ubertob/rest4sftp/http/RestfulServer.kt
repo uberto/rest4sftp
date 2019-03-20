@@ -1,41 +1,19 @@
 package com.ubertob.rest4sftp.http
 
+import com.ubertob.rest4sftp.model.*
 import org.http4k.core.HttpHandler
-import org.http4k.core.Method.DELETE
-import org.http4k.core.Method.GET
-import org.http4k.core.Method.PUT
+import org.http4k.core.Method.*
 import org.http4k.core.Request
 import org.http4k.core.Response
+import org.http4k.core.Status
 import org.http4k.routing.bind
 import org.http4k.routing.path
 import org.http4k.routing.routes
 import org.http4k.server.Jetty
 import org.http4k.server.asServer
-import com.ubertob.rest4sftp.model.Command
-import com.ubertob.rest4sftp.model.CommandHandler
-import com.ubertob.rest4sftp.model.CreateFolder
-import com.ubertob.rest4sftp.model.DeleteFile
-import com.ubertob.rest4sftp.model.DeleteFolder
-import com.ubertob.rest4sftp.model.HttpResult
-import com.ubertob.rest4sftp.model.InputStreamResponseBody
-import com.ubertob.rest4sftp.model.JsonResponseBody
-import com.ubertob.rest4sftp.model.RemoteHost
-import com.ubertob.rest4sftp.model.RetrieveFile
-import com.ubertob.rest4sftp.model.RetrieveFolder
-import com.ubertob.rest4sftp.model.StringResponseBody
-import com.ubertob.rest4sftp.model.UploadFile
-import org.http4k.core.Status
 
 
 class RestfulServer(private val commandHandler: CommandHandler) : HttpHandler {
-
-    companion object {
-        val HOST_HEADER = "FTP-Host"
-        val PORT_HEADER = "FTP-Port"
-        val USER_HEADER = "FTP-User"
-        val PWD_HEADER = "FTP-Password"
-    }
-
 
     override fun invoke(request: Request): Response =
         routes(
@@ -48,17 +26,9 @@ class RestfulServer(private val commandHandler: CommandHandler) : HttpHandler {
         ).invoke(request)
 
 
-    private fun Request.toFtpHost(): RemoteHost =
-            RemoteHost(
-                    host = header(HOST_HEADER) ?: throw UnauthorisedException(message="FTP host not configured in headers"),
-                    port = header(PORT_HEADER)?.toInt() ?: throw UnauthorisedException(message="FTP port not configured in headers"),
-                    userName = header(USER_HEADER) ?: throw UnauthorisedException(message="FTP username not configured in headers"),
-                    password = header(PWD_HEADER) ?: throw UnauthorisedException(message="FTP password not configured in headers")
-            )
-
     private fun Command.process(req: Request): Response =
             try {
-                commandHandler.handle(req.toFtpHost(), this).toResponse()
+                commandHandler.handle(req.toRemoteHost(), this).toResponse()
             } catch (e: UnauthorisedException) {
                 Response(Status.UNAUTHORIZED).body(e.message.orEmpty())
             }
@@ -79,8 +49,3 @@ class RestfulServer(private val commandHandler: CommandHandler) : HttpHandler {
 
     fun start(port: Int) = this.asServer(Jetty(port)).start()
 }
-
-class UnauthorisedException(
-        override val cause: Throwable? = null,
-        override val message: String? = null
-): Exception()

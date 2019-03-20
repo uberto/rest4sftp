@@ -6,6 +6,7 @@ import assertk.fail
 import com.ubertob.rest4sftp.model.CommandHandler
 import com.ubertob.rest4sftp.model.SimpleFtpClientFactory
 import org.apache.http.HttpHeaders
+import org.http4k.base64Encode
 import org.http4k.core.ContentType
 import org.http4k.core.ContentType.Companion.OCTET_STREAM
 import org.http4k.core.Method
@@ -24,13 +25,20 @@ abstract class RestfulServerContract {
     protected abstract val ftpUser: String
     protected abstract val ftpPassword: String
 
-    private fun Request.withAuthentication() =
+    private fun Request.withAuthentication(password: String = ftpPassword) =
         headers(listOf(
             "FTP-Host" to ftpHost,
             "FTP-Port" to ftpPort.toString(),
             "FTP-User" to ftpUser,
-            "FTP-Password" to ftpPassword
+            "FTP-Password" to password
         ))
+
+    private fun Request.withAuthorisation(password: String = ftpPassword) =
+            headers(listOf(
+                    "FTP-Host" to ftpHost,
+                    "FTP-Port" to ftpPort.toString(),
+                    "Authorization" to "Basic ${"$ftpUser:$password".base64Encode()}"
+            ))
 
     private val service: RestfulServer = RestfulServer(CommandHandler { ftpClientFactory(it) })
 
@@ -42,35 +50,42 @@ abstract class RestfulServerContract {
 
     @Test
     fun `returns unauthorised if invalid credentials supplied`() {
-        val request = Request(Method.GET, "/folder/upload").withAuthentication().replaceHeader("FTP-Password", "bad password")
+        val request = Request(Method.GET, "/folder/upload").withAuthentication("bad password")
+        val response = service.invoke(request)
+        assertThat(response.status).isEqualTo(Status.UNAUTHORIZED)
+    }
+
+    @Test
+    fun `returns unauthorised if invalid credentials supplied with basic auth`() {
+        val request = Request(Method.GET, "/folder/upload").withAuthorisation("bad password")
         val response = service.invoke(request)
         assertThat(response.status).isEqualTo(Status.UNAUTHORIZED)
     }
 
     @Test
     fun `returns file not found for invalid path`() {
-        val request = Request(Method.GET, "/file/upload/unknown_file.txt").withAuthentication()
+        val request = Request(Method.GET, "/file/upload/unknown_file.txt").withAuthorisation()
         val response = service.invoke(request)
         assertThat(response.status).isEqualTo(Status.NOT_FOUND)
     }
 
     @Test
     fun `returns file not found if given a folder path`() {
-        val request = Request(Method.GET, "/file/upload").withAuthentication()
+        val request = Request(Method.GET, "/file/upload").withAuthorisation()
         val response = service.invoke(request)
         assertThat(response.status).isEqualTo(Status.NOT_FOUND)
     }
 
     @Test
     fun `returns folder not found if folder does not exist on server`() {
-        val request = Request(Method.GET, "/folder/upload/unknown_subfolder").withAuthentication()
+        val request = Request(Method.GET, "/folder/upload/unknown_subfolder").withAuthorisation()
         val response = service.invoke(request)
         assertThat(response.status).isEqualTo(Status.NOT_FOUND)
     }
 
     @Test
     fun `returns valid folder`() {
-        val request = Request(Method.GET, "/folder/upload").withAuthentication()
+        val request = Request(Method.GET, "/folder/upload").withAuthorisation()
         val response = service.invoke(request)
         assertThat(response.status).isEqualTo(Status.OK)
         assertThat(response.contentType).isEqualTo(ContentType.APPLICATION_JSON.toHeaderValue())
@@ -83,40 +98,40 @@ abstract class RestfulServerContract {
         val testFileContents = "this is an uploaded file"
         val updatedFileContents = "this is a revised uploaded file"
 
-        service.invoke(Request(Method.GET, "/file$uploadFilePath").withAuthentication())
+        service.invoke(Request(Method.GET, "/file$uploadFilePath").withAuthorisation())
             .handleResponse {
                 assertThat(it.status).isEqualTo(Status.NOT_FOUND)
             }
 
-        service.invoke(Request(Method.PUT, "/file$uploadFilePath").body(testFileContents).withAuthentication()).handleResponse {
+        service.invoke(Request(Method.PUT, "/file$uploadFilePath").body(testFileContents).withAuthorisation()).handleResponse {
             assertThat(it.status).isEqualTo(Status.OK)
         }
 
-        service.invoke(Request(Method.GET, "/file$uploadFilePath").withAuthentication())
+        service.invoke(Request(Method.GET, "/file$uploadFilePath").withAuthorisation())
             .handleResponse { response ->
                 assertThat(response.status).isEqualTo(Status.OK)
                 assertThat(response.contentType).isEqualTo(OCTET_STREAM.value)
                 assertThat(response.bodyString()).isEqualTo(testFileContents)
             }
 
-        service.invoke(Request(Method.PUT, "/file$uploadFilePath").body(updatedFileContents).withAuthentication())
+        service.invoke(Request(Method.PUT, "/file$uploadFilePath").body(updatedFileContents).withAuthorisation())
             .handleResponse { response ->
                 assertThat(response.status).isEqualTo(Status.OK)
             }
 
-        service.invoke(Request(Method.GET, "/file$uploadFilePath").withAuthentication())
+        service.invoke(Request(Method.GET, "/file$uploadFilePath").withAuthorisation())
             .handleResponse { response ->
                 assertThat(response.status).isEqualTo(Status.OK)
                 assertThat(response.contentType).isEqualTo(OCTET_STREAM.value)
                 assertThat(response.bodyString()).isEqualTo(updatedFileContents)
             }
 
-        service.invoke(Request(Method.DELETE, "/file$uploadFilePath").withAuthentication())
+        service.invoke(Request(Method.DELETE, "/file$uploadFilePath").withAuthorisation())
             .handleResponse { response ->
                 assertThat(response.status).isEqualTo(Status.OK)
             }
 
-        service.invoke(Request(Method.GET, "/file$uploadFilePath").withAuthentication())
+        service.invoke(Request(Method.GET, "/file$uploadFilePath").withAuthorisation())
             .handleResponse { response ->
                 assertThat(response.status).isEqualTo(Status.NOT_FOUND)
             }

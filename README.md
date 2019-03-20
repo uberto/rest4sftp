@@ -111,9 +111,15 @@ Returns 401 if invalid ftp server credentials were present in the request header
 The following are required HTTP request headers:
 * FTP-Host: the remote (s)ftp server's hostname or IP
 * FTP-Port: the remote (s)ftp server's port (default is 21 for ftp, 22 for sftp)
+
+And either:
+
 * FTP-User: the name of the ftp account on the remote server
 * FTP-Password: the password for the ftp account on the remote server
 
+Or:
+
+* Authorization: a basic auth header (RFC7617) containing the ftp account name and password
 
 # Code design
 
