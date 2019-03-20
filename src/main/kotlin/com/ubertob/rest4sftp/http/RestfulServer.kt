@@ -50,16 +50,16 @@ class RestfulServer(private val commandHandler: CommandHandler) : HttpHandler {
 
     private fun Request.toFtpHost(): RemoteHost =
             RemoteHost(
-                    host = header(HOST_HEADER) ?: throw IllegalStateException("FTP host not configured in headers"),
-                    port = header(PORT_HEADER)?.toInt() ?: throw IllegalStateException("FTP port not configured in headers"),
-                    userName = header(USER_HEADER) ?: throw IllegalStateException("FTP username not configured in headers"),
-                    password = header(PWD_HEADER) ?: throw IllegalStateException("FTP password not configured in headers")
+                    host = header(HOST_HEADER) ?: throw UnauthorisedException(message="FTP host not configured in headers"),
+                    port = header(PORT_HEADER)?.toInt() ?: throw UnauthorisedException(message="FTP port not configured in headers"),
+                    userName = header(USER_HEADER) ?: throw UnauthorisedException(message="FTP username not configured in headers"),
+                    password = header(PWD_HEADER) ?: throw UnauthorisedException(message="FTP password not configured in headers")
             )
 
     private fun Command.process(req: Request): Response =
             try {
                 commandHandler.handle(req.toFtpHost(), this).toResponse()
-            } catch (e: IllegalStateException) {
+            } catch (e: UnauthorisedException) {
                 Response(Status.UNAUTHORIZED).body(e.message.orEmpty())
             }
 
@@ -79,3 +79,8 @@ class RestfulServer(private val commandHandler: CommandHandler) : HttpHandler {
 
     fun start(port: Int) = this.asServer(Jetty(port)).start()
 }
+
+class UnauthorisedException(
+        override val cause: Throwable? = null,
+        override val message: String? = null
+): Exception()

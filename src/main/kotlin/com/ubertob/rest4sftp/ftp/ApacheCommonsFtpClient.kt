@@ -1,5 +1,6 @@
 package com.ubertob.rest4sftp.ftp
 
+import com.ubertob.rest4sftp.http.UnauthorisedException
 import org.apache.commons.net.PrintCommandListener
 import org.apache.commons.net.ftp.FTPClient
 import org.apache.commons.net.ftp.FTPFile
@@ -73,11 +74,11 @@ class ApacheCommonsFtpClient(private val remoteHost: RemoteHost, val timeout: Du
 
             if (! FTPReply.isPositiveCompletion(ftp.replyCode)) {
                 System.err.println(errorMsg)
-                throw RuntimeException(errorMsg)
+                throw UnauthorisedException(message = errorMsg)
             }
             return result
-        } catch (e: Throwable) {
-            throw RuntimeException(e)
+        } catch (ex: Throwable) {
+            throw UnauthorisedException(cause = ex)
         }
     }
 

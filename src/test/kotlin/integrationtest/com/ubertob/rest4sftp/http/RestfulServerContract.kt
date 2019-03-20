@@ -41,7 +41,7 @@ abstract class RestfulServerContract {
         assertThat(response.status).isEqualTo(Status.UNAUTHORIZED)
     }
 
-    //TODO: fix this @Test
+    @Test
     fun `returns unauthorised if invalid credentials supplied`() {
         val request = Request(Method.GET, "/folder/upload").withAuthentication().replaceHeader("FTP-Password", "bad password")
         val response = service.invoke(request)

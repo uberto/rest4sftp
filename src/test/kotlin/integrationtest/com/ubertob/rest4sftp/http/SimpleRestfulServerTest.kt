@@ -1,5 +1,7 @@
 package integrationtest.com.ubertob.rest4sftp.http
 
+import com.ubertob.rest4sftp.http.UnauthorisedException
+import com.ubertob.rest4sftp.model.RemoteHost
 import com.ubertob.rest4sftp.model.SimpleFtpClientFactory
 import com.ubertob.rest4sftp.model.SimpleRemoteClient
 import org.apache.commons.net.ftp.FTPFile
@@ -16,12 +18,13 @@ class SimpleRestfulServerTest : RestfulServerContract() {
     override val ftpUser: String = "fake"
     override val ftpPassword: String = "fake"
 
-    override val ftpClientFactory: SimpleFtpClientFactory = { _ -> FakeFtpClient(directories, files) }
+    override val ftpClientFactory: SimpleFtpClientFactory = { remoteHost -> FakeFtpClient(remoteHost, directories, files) }
 }
 
 class FakeFtpClient(
+        private val remoteHost: RemoteHost,
         private val directories: MutableList<String>,
-        private val files: MutableMap<String,ByteArray>
+        private val files: MutableMap<String, ByteArray>
 ) : SimpleRemoteClient {
 
     override fun listFiles(directoryName: String): List<FTPFile>? =
@@ -55,7 +58,10 @@ class FakeFtpClient(
         return true
     }
 
-    override fun connect(): SimpleRemoteClient = this
+    override fun connect(): SimpleRemoteClient =
+            if (remoteHost.password.contains("bad"))
+                throw UnauthorisedException(message = "invalid password")
+            else this
 
     override fun renameFile(directoryName: String, oldFileName: String, newFileName: String): Boolean =
             retrieveFile(directoryName, oldFileName)
