@@ -1,66 +1,69 @@
 package com.ubertob.rest4sftp.testing
 
 import com.ubertob.rest4sftp.http.UnauthorisedException
+import com.ubertob.rest4sftp.model.FileInfo
+import com.ubertob.rest4sftp.model.FileSystemElement
 import com.ubertob.rest4sftp.model.RemoteHost
 import com.ubertob.rest4sftp.model.SimpleRemoteClient
-import org.apache.commons.net.ftp.FTPFile
 import org.junit.jupiter.api.Assertions.assertTrue
 import java.io.InputStream
+import java.time.Instant
 
-class SpySimpleRemoteClient(val remoteHost: RemoteHost, val files: MutableMap<String, MutableList<FTPFile>>, val filesContent: MutableMap<String, ByteArray>) : SimpleRemoteClient {
+class SpySimpleRemoteClient(val remoteHost: RemoteHost, val files: MutableMap<String, MutableList<FileSystemElement>>, val filesContent: MutableMap<String, ByteArray>) : SimpleRemoteClient {
 
-    override fun deleteFolder(directoryName: String): Boolean {
+    override fun deleteFolder(folderPath: String): Boolean {
         assertTrue(connected)
-        return files.remove(directoryName)?.let { true } ?: false
+        return files.remove(folderPath)?.let { true } ?: false
     }
 
-    override fun createFolder(directoryName: String): Boolean {
+    override fun createFolder(folderPath: String): Boolean {
         assertTrue(connected)
-        return files.putIfAbsent(directoryName, mutableListOf())?.let { false } ?: true
+        return files.putIfAbsent(folderPath, mutableListOf())?.let { false } ?: true
     }
 
     var connected: Boolean = false
     override fun isConnected(): Boolean = connected
 
-    override fun listFiles(directoryName: String): List<FTPFile>? {
+    override fun listFiles(folderPath: String): List<FileSystemElement>? {
         assertTrue(connected)
-        return files[directoryName]
+        return files[folderPath]
     }
 
-    override fun retrieveFile(directoryName: String, fileName: String): ByteArray? {
+    override fun retrieveFile(folderPath: String, fileName: String): ByteArray? {
         assertTrue(connected)
-        return filesContent["$directoryName/$fileName"]
+        return filesContent["$folderPath/$fileName"]
     }
 
-    override fun uploadFile(directoryName: String, fileName: String, upload: InputStream): Boolean {
+    override fun uploadFile(folderPath: String, fileName: String, upload: InputStream): Boolean {
         assertTrue(connected)
 
 
-        return if (!files.containsKey(directoryName))
+        return if (!files.containsKey(folderPath))
              false
         else {
             val bytesContent = upload.readBytes()
-            val ftpFile = FTPFile().apply { name = fileName; size = bytesContent.size.toLong() }
-            files[directoryName]?.add(ftpFile)
+            val ftpFile = FileInfo(fileName, Instant.now(), bytesContent.size.toLong(), folderPath)
+            files[folderPath]?.add(ftpFile)
 
-            filesContent["$directoryName/$fileName"] = bytesContent
+            filesContent["$folderPath/$fileName"] = bytesContent
             true
         }
     }
 
-    override fun renameFile(directoryName: String, oldFileName: String, newFileName: String): Boolean {
+    override fun renameFile(folderPath: String, oldFileName: String, newFileName: String): Boolean {
         assertTrue(connected)
 
-        files[directoryName]?.filter { it.name == oldFileName }?.map{
+        files[folderPath]?.filter { it.name == oldFileName }
+            ?.filterIsInstance<FileInfo>()
+            ?.map{  it.copy(name = newFileName) }
 
-            FTPFile().apply { name = newFileName; size = it.size }}
-        return files[directoryName]?.any { it.name == newFileName } ?: false
+        return files[folderPath]?.any { it.name == newFileName } ?: false
     }
 
-    override fun deleteFile(directoryName: String, fileName: String): Boolean {
+    override fun deleteFile(folderPath: String, fileName: String): Boolean {
         assertTrue(connected)
-        filesContent.remove("$directoryName/$fileName")
-        return files[directoryName]?.removeIf { it.name == fileName } ?: false
+        filesContent.remove("$folderPath/$fileName")
+        return files[folderPath]?.removeIf { it.name == fileName } ?: false
     }
 
     override fun connect(): SimpleRemoteClient =

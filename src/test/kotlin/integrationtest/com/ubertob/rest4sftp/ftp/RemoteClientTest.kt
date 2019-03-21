@@ -1,13 +1,19 @@
 package integrationtest.com.ubertob.rest4sftp.ftp
 
 import assertk.assertThat
-import assertk.assertions.*
+import assertk.assertions.contains
+import assertk.assertions.isEqualTo
+import assertk.assertions.isGreaterThan
+import assertk.assertions.isGreaterThanOrEqualTo
+import assertk.assertions.isNotNull
+import assertk.assertions.isNull
 import assertk.fail
 import com.ubertob.rest4sftp.model.SimpleRemoteClient
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.async
 import kotlinx.coroutines.delay
-import org.junit.jupiter.api.Assertions
+import org.junit.jupiter.api.Assertions.assertFalse
+import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 import java.io.File
 
@@ -50,15 +56,15 @@ abstract class RemoteClientTest {
             it.deleteFolder("/upload/delete-folder")
         }
 
-        Assertions.assertTrue(deleteSuccess)
-        Assertions.assertFalse(deleteFolder.exists())
+        assertTrue(deleteSuccess)
+        assertFalse(deleteFolder.exists())
 
         val deleteFailure = createConnection().use {
             it.deleteFolder("/upload/delete-folder")
         }
 
-        Assertions.assertFalse(deleteFailure)
-        Assertions.assertFalse(deleteFolder.exists())
+        assertFalse(deleteFailure)
+        assertFalse(deleteFolder.exists())
 
     }
 
@@ -69,23 +75,23 @@ abstract class RemoteClientTest {
         val folderToBeCreated = File("${baseDir}new-folder")
         folderToBeCreated.delete()
 
-        Assertions.assertFalse(folderToBeCreated.exists())
+        assertFalse(folderToBeCreated.exists())
 
         val createSuccess = createConnection().use {
             it.createFolder("/upload/new-folder")
         }
 
-        Assertions.assertTrue(createSuccess)
-        Assertions.assertTrue(folderToBeCreated.exists())
+        assertTrue(createSuccess)
+        assertTrue(folderToBeCreated.exists())
 
         val createFailure = createConnection().use {
             it.createFolder("/upload/new-folder")
         }
 
-        Assertions.assertFalse(createFailure)
+        assertFalse(createFailure)
         folderToBeCreated.delete()
 
-        Assertions.assertFalse(folderToBeCreated.exists())
+        assertFalse(folderToBeCreated.exists())
 
 
     }
@@ -139,15 +145,15 @@ abstract class RemoteClientTest {
             it.deleteFile("/upload", "test-delete.xml")
         }
 
-        Assertions.assertTrue(deleteSuccess)
-        Assertions.assertFalse(deleteFile.exists())
+        assertTrue(deleteSuccess)
+        assertFalse(deleteFile.exists())
 
         val deleteFailure = createConnection().use {
             it.deleteFile("/upload", "test-delete.xml")
         }
 
-        Assertions.assertFalse(deleteFailure)
-        Assertions.assertFalse(deleteFile.exists())
+        assertFalse(deleteFailure)
+        assertFalse(deleteFile.exists())
 
     }
 
@@ -161,12 +167,12 @@ abstract class RemoteClientTest {
         val renameSuccess = createConnection().use {
             it.renameFile("/upload", "test-rename.xml", "test-renamed.xml")
         }
-        Assertions.assertTrue(renameSuccess)
+        assertTrue(renameSuccess)
 
         val renamedFile = File("${baseDir}test-renamed.xml")
 
-        Assertions.assertTrue(renamedFile.exists())
-        Assertions.assertFalse(toBeRenamedFile.exists())
+        assertTrue(renamedFile.exists())
+        assertFalse(toBeRenamedFile.exists())
 
         createConnection().deleteFile("/upload", "test-renamed.xml")
 
@@ -181,7 +187,7 @@ abstract class RemoteClientTest {
 
         uploadFile.delete()
         uploadTempFile.delete()
-        Assertions.assertFalse(uploadFile.exists())
+        assertFalse(uploadFile.exists())
 
 
         val createdTemp = GlobalScope.async {
@@ -197,9 +203,9 @@ abstract class RemoteClientTest {
             it.uploadFile("/upload", "test-upload.xml", "test".byteInputStream())
         }
 
-        Assertions.assertTrue(uploadSuccess)
-        Assertions.assertTrue(uploadFile.exists())
-        Assertions.assertTrue(createdTemp.getCompleted())
+        assertTrue(uploadSuccess)
+        assertTrue(uploadFile.exists())
+        assertTrue(createdTemp.getCompleted())
 
         uploadFile.delete()
 
@@ -219,8 +225,8 @@ abstract class RemoteClientTest {
             it.uploadFile("/upload", "test-upload.xml", "test".byteInputStream())
         }
 
-        Assertions.assertTrue(uploadSuccess)
-        Assertions.assertTrue(uploadFile.exists())
+        assertTrue(uploadSuccess)
+        assertTrue(uploadFile.exists())
 
         uploadFile.delete()
 
@@ -235,15 +241,15 @@ abstract class RemoteClientTest {
         uploadFile.delete()
         uploadTempFile.delete()
 
-        Assertions.assertTrue(
+        assertTrue(
                 createConnection().use {
                     it.uploadFile("/upload", "test-upload.xml", "test".byteInputStream())
                 }
         )
 
-        Assertions.assertTrue(uploadFile.exists())
+        assertTrue(uploadFile.exists())
 
-        Assertions.assertTrue(
+        assertTrue(
                 createConnection().use {
                     it.uploadFile("/upload", "test-upload.xml", "updated".byteInputStream())
                 }
@@ -259,14 +265,14 @@ abstract class RemoteClientTest {
 
         val uploadFile = File("${baseDir}-123/test-upload.xml")
 
-        Assertions.assertFalse(uploadFile.exists())
+        assertFalse(uploadFile.exists())
 
         val uploadFailure = createConnection().use {
             it.uploadFile("/upload123", "test-upload.xml", "test".byteInputStream())
         }
 
-        Assertions.assertFalse(uploadFailure)
-        Assertions.assertFalse(uploadFile.exists())
+        assertFalse(uploadFailure)
+        assertFalse(uploadFile.exists())
 
         uploadFile.delete()
     }

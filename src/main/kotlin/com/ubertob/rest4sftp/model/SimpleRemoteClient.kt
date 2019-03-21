@@ -1,17 +1,16 @@
 package com.ubertob.rest4sftp.model
 
-import org.apache.commons.net.ftp.FTPFile
 import java.io.InputStream
 
 interface SimpleRemoteClient : AutoCloseable {
 
-    fun listFiles(directoryName: String): List<FTPFile>?
-    fun createFolder(directoryName: String): Boolean
-    fun deleteFolder(directoryName: String): Boolean
-    fun retrieveFile(directoryName: String, fileName: String): ByteArray?
-    fun uploadFile(directoryName: String, fileName: String, upload: InputStream): Boolean
-    fun deleteFile(directoryName: String, fileName: String): Boolean
+    fun listFiles(folderPath: String): List<FileSystemElement>?
+    fun createFolder(folderPath: String): Boolean
+    fun deleteFolder(folderPath: String): Boolean
+    fun retrieveFile(folderPath: String, fileName: String): ByteArray?
+    fun uploadFile(folderPath: String, fileName: String, upload: InputStream): Boolean
+    fun deleteFile(folderPath: String, fileName: String): Boolean
     fun connect(): SimpleRemoteClient
-    fun renameFile(directoryName: String, oldFileName: String, newFileName: String): Boolean
+    fun renameFile(folderPath: String, oldFileName: String, newFileName: String): Boolean
     fun isConnected(): Boolean
 }

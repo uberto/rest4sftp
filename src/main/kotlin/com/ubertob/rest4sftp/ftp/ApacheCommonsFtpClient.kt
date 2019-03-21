@@ -1,6 +1,9 @@
 package com.ubertob.rest4sftp.ftp
 
 import com.ubertob.rest4sftp.http.UnauthorisedException
+import com.ubertob.rest4sftp.model.FileInfo
+import com.ubertob.rest4sftp.model.FileSystemElement
+import com.ubertob.rest4sftp.model.FolderInfo
 import com.ubertob.rest4sftp.model.RemoteHost
 import com.ubertob.rest4sftp.model.SimpleRemoteClient
 import org.apache.commons.net.PrintCommandListener
@@ -38,37 +41,37 @@ class ApacheCommonsFtpClient(private val remoteHost: RemoteHost, val timeout: Du
     override fun isConnected(): Boolean =
         ftp.isConnected
 
-    override fun listFiles(directoryName: String): List<FTPFile>? =
-        if (ftp.changeWorkingDirectory(directoryName))
-            ftp.listFiles().toList()
+    override fun listFiles(folderPath: String): List<FileSystemElement>? =
+        if (ftp.changeWorkingDirectory(folderPath))
+            ftp.listFiles().toFileSystemElements(folderPath)
         else null
 
-    override fun createFolder(directoryName: String): Boolean = ftp.makeDirectory(directoryName)
+    override fun createFolder(folderPath: String): Boolean = ftp.makeDirectory(folderPath)
 
-    override fun deleteFolder(directoryName: String): Boolean = ftp.removeDirectory(directoryName)
+    override fun deleteFolder(folderPath: String): Boolean = ftp.removeDirectory(folderPath)
 
-    override fun retrieveFile(directoryName: String, fileName: String): ByteArray? =
-        if (ftp.changeWorkingDirectory(directoryName))
+    override fun retrieveFile(folderPath: String, fileName: String): ByteArray? =
+        if (ftp.changeWorkingDirectory(folderPath))
             ftp.retrieveFileStream(fileName)?.use {
                 it.readBytes()
             }
         else null
 
-    override fun uploadFile(directoryName: String, fileName: String, upload: InputStream): Boolean =
-            if (ftp.changeWorkingDirectory(directoryName)
+    override fun uploadFile(folderPath: String, fileName: String, upload: InputStream): Boolean =
+            if (ftp.changeWorkingDirectory(folderPath)
                     && ftp.storeFile(fileName.tempExt(), upload)) {
                     ftp.status
                     ftp.rename(fileName.tempExt(), fileName)
             } else { false }
 
 
-    override fun renameFile(directoryName: String, oldFileName: String, newFileName: String): Boolean =
-            ftp.rename("$directoryName/$oldFileName", "$directoryName/$newFileName")
+    override fun renameFile(folderPath: String, oldFileName: String, newFileName: String): Boolean =
+            ftp.rename("$folderPath/$oldFileName", "$folderPath/$newFileName")
 
     private fun String.tempExt() = this + tempExtension
 
-    override fun deleteFile(directoryName: String, fileName: String): Boolean =
-        ftp.changeWorkingDirectory(directoryName)
+    override fun deleteFile(folderPath: String, fileName: String): Boolean =
+        ftp.changeWorkingDirectory(folderPath)
         && ftp.deleteFile(fileName)
 
     private fun <R> check(errorMsg: String, block: () -> R): R {
@@ -86,3 +89,7 @@ class ApacheCommonsFtpClient(private val remoteHost: RemoteHost, val timeout: Du
     }
 
 }
+
+private fun Array<FTPFile>.toFileSystemElements(folderPath: String): List<FileSystemElement> =
+    filter { it.isFile }.map { FileInfo(it.name, it.timestamp.toInstant(), it.size, folderPath) } +
+        filter { it.isDirectory }.map { FolderInfo(it.name, it.timestamp.toInstant(), folderPath) }

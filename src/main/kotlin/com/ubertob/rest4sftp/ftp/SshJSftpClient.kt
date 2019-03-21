@@ -2,6 +2,9 @@ package com.ubertob.rest4sftp.ftp
 
 import com.ubertob.rest4sftp.http.UnauthorisedException
 import com.ubertob.rest4sftp.model.CommandHandler
+import com.ubertob.rest4sftp.model.FileInfo
+import com.ubertob.rest4sftp.model.FileSystemElement
+import com.ubertob.rest4sftp.model.FolderInfo
 import com.ubertob.rest4sftp.model.RemoteHost
 import com.ubertob.rest4sftp.model.SimpleRemoteClient
 import net.schmizz.sshj.DefaultConfig
@@ -12,12 +15,12 @@ import net.schmizz.sshj.transport.verification.PromiscuousVerifier
 import net.schmizz.sshj.userauth.UserAuthException
 import net.schmizz.sshj.xfer.InMemoryDestFile
 import net.schmizz.sshj.xfer.InMemorySourceFile
-import org.apache.commons.net.ftp.FTPFile
 import java.io.ByteArrayOutputStream
 import java.io.InputStream
 import java.io.OutputStream
 import java.nio.file.Paths
 import java.time.Duration
+import java.time.Instant
 import java.util.logging.Logger
 
 
@@ -25,90 +28,88 @@ class SshJSftpClient(private val remoteHost: RemoteHost, private val timeout: Du
     private val sshClient = SSHClient(DefaultConfig())
 
 
-    fun toFtpFile(rrinfo: RemoteResourceInfo): FTPFile =
-            FTPFile().apply {
-                size = rrinfo.attributes.size
-                this.type = rrinfo.attributes.type.toTypeInt()
-//            setPermission(rrinfo.attributes.permissions)
-                name = rrinfo.name
+    fun toFtpFile(rrinfo: RemoteResourceInfo, folderPath: String): FileSystemElement =
+        if (rrinfo.attributes.type == FileMode.Type.REGULAR) {
+            FileInfo(rrinfo.name, Instant.ofEpochSecond(rrinfo.attributes.atime), rrinfo.attributes.size, folderPath)
+        } else {
+            FolderInfo(rrinfo.name, Instant.ofEpochSecond(rrinfo.attributes.atime), folderPath)
+        }
 
-            }
-
-    override fun listFiles(directoryName: String): List<FTPFile>? =
+    override fun listFiles(folderPath: String): List<FileSystemElement>? =
 
             runCatching {
                 sshClient.newSFTPClient().use { sftpClient ->
-                    sftpClient.ls(directoryName).map(::toFtpFile)
+                    sftpClient.ls(folderPath).map{toFtpFile(it, folderPath)}
                 }
             }.getOrNull()
                     .also {
-                        logger.info("GET -> ${remoteHost.userName}@${remoteHost.host}:${remoteHost.port}/$directoryName/ <- ${it?.size
+                        logger.info("GET -> ${remoteHost.userName}@${remoteHost.host}:${remoteHost.port}/$folderPath/ <- ${it?.size
                                 ?: "null"} items")
                     }
 
-    override fun createFolder(directoryName: String): Boolean =
+    override fun createFolder(folderPath: String): Boolean =
             runWithNoExceptions {
                 sshClient.newSFTPClient().use { sftpClient ->
-                    sftpClient.mkdir(directoryName)
+                    sftpClient.mkdir(folderPath)
                 }
             }.also {
-                logger.info("CREATE -> ${remoteHost.userName}@${remoteHost.host}:${remoteHost.port}/$directoryName/ <- $it")
+                logger.info("CREATE -> ${remoteHost.userName}@${remoteHost.host}:${remoteHost.port}/$folderPath/ <- $it")
             }
 
-    override fun deleteFolder(directoryName: String): Boolean =
+    override fun deleteFolder(folderPath: String): Boolean =
             runWithNoExceptions {
                 sshClient.newSFTPClient().use { sftpClient ->
-                    sftpClient.rmdir(directoryName)
+                    sftpClient.rmdir(folderPath)
                 }
             }.also {
-                logger.info("DELETE -> ${remoteHost.userName}@${remoteHost.host}:${remoteHost.port}/$directoryName/ <- $it")
+                logger.info("DELETE -> ${remoteHost.userName}@${remoteHost.host}:${remoteHost.port}/$folderPath/ <- $it")
             }
 
-    override fun retrieveFile(directoryName: String, fileName: String): ByteArray? =
+    override fun retrieveFile(folderPath: String, fileName: String): ByteArray? =
             runCatching {
                 InMemoryOutputFile().also {
                     sshClient.newSFTPClient().use { sftpClient ->
-                        sftpClient.get(directoryName slash fileName, it)
+                        sftpClient.get(folderPath slash fileName, it)
                     }
                 }.outputStream.toByteArray()
             }.getOrNull()
                     .also {
-                        logger.info("GET -> ${remoteHost.userName}@${remoteHost.host}:${remoteHost.port}/$directoryName/$fileName <- ${it?.size
+                        logger.info("GET -> ${remoteHost.userName}@${remoteHost.host}:${remoteHost.port}/$folderPath/$fileName <- ${it?.size
                                 ?: "null"} bytes")
                     }
 
-    override fun uploadFile(directoryName: String, fileName: String, upload: InputStream): Boolean =
+    override fun uploadFile(folderPath: String, fileName: String, upload: InputStream): Boolean =
             runWithNoExceptions {
                 val sourceFile = InMemoryInputFile(upload)
                 val tempFileName = "$fileName.io"
                 sshClient.newSFTPClient().use { sftpClient ->
-                    sftpClient.put(sourceFile, directoryName slash tempFileName)
-                    sftpClient.statExistence(directoryName slash fileName)?.let {
-                        sftpClient.rm(directoryName slash fileName)
+                    sftpClient.put(sourceFile, folderPath slash tempFileName)
+                    sftpClient.statExistence(folderPath slash fileName)?.let {
+                        sftpClient.rm(folderPath slash fileName)
                     }
-                    sftpClient.rename(directoryName slash tempFileName, directoryName slash fileName)
+                    sftpClient.rename(folderPath slash tempFileName, folderPath slash fileName)
                 }
             }.also {
-                logger.info("UPLOAD -> ${remoteHost.userName}@${remoteHost.host}:${remoteHost.port}/$directoryName/$fileName <- $it")
+                logger.info("UPLOAD -> ${remoteHost.userName}@${remoteHost.host}:${remoteHost.port}/$folderPath/$fileName <- $it")
             }
 
-    override fun renameFile(directoryName: String, oldFileName: String, newFileName: String): Boolean =
+    override fun renameFile(folderPath: String, oldFileName: String, newFileName: String): Boolean =
             runWithNoExceptions {
                 sshClient.newSFTPClient().use { sftpClient ->
-                    sftpClient.rename(directoryName slash oldFileName, directoryName slash newFileName)
+                    sftpClient.rename(folderPath slash oldFileName, folderPath slash newFileName)
                 }
             }.also {
-                logger.info("RENAME -> ${remoteHost.userName}@${remoteHost.host}:${remoteHost.port}/$directoryName/$oldFileName to $newFileName <- $it")
+                logger.info("RENAME -> ${remoteHost.userName}@${remoteHost.host}:${remoteHost.port}/$folderPath/$oldFileName to $newFileName <- $it")
             }
 
 
-    override fun deleteFile(directoryName: String, fileName: String): Boolean =
+    override fun deleteFile(folderPath: String, fileName: String): Boolean =
             runWithNoExceptions {
                 sshClient.newSFTPClient().use { sftpClient ->
-                    sftpClient.rm(directoryName slash fileName)
+                    sftpClient.rm(folderPath slash fileName)
                 }
             }.also {
-                logger.info("DELETE -> ${remoteHost.userName}@${remoteHost.host}:${remoteHost.port}/$directoryName/$fileName <- $it")
+                logger.info("DELETE -> ${remoteHost.userName}@${remoteHost.host}:${remoteHost.port}/$folderPath/$fileName <- $it")
             }
 
     private fun runWithNoExceptions(block: () -> Unit): Boolean =
@@ -139,18 +140,6 @@ class SshJSftpClient(private val remoteHost: RemoteHost, private val timeout: Du
         val logger: Logger = Logger.getLogger(CommandHandler::class.java.name)
     }
 }
-
-private fun FileMode.Type.toTypeInt(): Int =
-        when (this) {
-            FileMode.Type.BLOCK_SPECIAL -> FTPFile.UNKNOWN_TYPE
-            FileMode.Type.CHAR_SPECIAL -> FTPFile.UNKNOWN_TYPE
-            FileMode.Type.FIFO_SPECIAL -> FTPFile.UNKNOWN_TYPE
-            FileMode.Type.SOCKET_SPECIAL -> FTPFile.UNKNOWN_TYPE
-            FileMode.Type.REGULAR -> FTPFile.FILE_TYPE
-            FileMode.Type.DIRECTORY -> FTPFile.DIRECTORY_TYPE
-            FileMode.Type.SYMLINK -> FTPFile.SYMBOLIC_LINK_TYPE
-            FileMode.Type.UNKNOWN -> FTPFile.UNKNOWN_TYPE
-        }
 
 
 private infix fun String.slash(fileName: String): String = Paths.get(this, fileName).toString()

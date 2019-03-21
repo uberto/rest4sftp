@@ -7,9 +7,10 @@ import com.fasterxml.jackson.databind.ObjectMapper
 import com.ubertob.rest4sftp.http.CustomHeaders
 import com.ubertob.rest4sftp.http.RestfulServer
 import com.ubertob.rest4sftp.model.CommandHandler
+import com.ubertob.rest4sftp.model.FileInfo
+import com.ubertob.rest4sftp.model.FolderInfo
 import com.ubertob.rest4sftp.model.toFolderResponse
 import com.ubertob.rest4sftp.testing.SpySimpleRemoteClient
-import org.apache.commons.net.ftp.FTPFile
 import org.http4k.core.Body
 import org.http4k.core.Method
 import org.http4k.core.Request
@@ -17,13 +18,17 @@ import org.http4k.core.Response
 import org.http4k.core.Status
 import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Test
+import java.time.Instant
+
 
 class RestfulServerTest {
 
-    private val file1 = FTPFile().apply { name = "file1"; size = 123; type = FTPFile.FILE_TYPE }
-    private val file2 = FTPFile().apply { name = "file2"; size = 234; type = FTPFile.FILE_TYPE }
-    private val dir1 = FTPFile().apply { name = "subFolder"; size = 0; type = FTPFile.DIRECTORY_TYPE }
-    private val files = mutableMapOf("folder1" to mutableListOf(file1, file2, dir1))
+    private val ROOT_FOLDER = "folder1"
+
+    private val file1 = FileInfo("file1", Instant.ofEpochSecond(0), 123, ROOT_FOLDER)
+    private val file2 = FileInfo("file2", Instant.ofEpochSecond(0), 123, ROOT_FOLDER)
+    private val dir1 = FolderInfo("subFolder", Instant.ofEpochSecond(0), ROOT_FOLDER)
+    private val files = mutableMapOf(ROOT_FOLDER to mutableListOf(file1, file2, dir1))
 
     private lateinit var fakeFtpClient: SpySimpleRemoteClient
 
@@ -42,15 +47,15 @@ class RestfulServerTest {
 
     @Test
     fun `map files to folder response`() {
-        val expectedJson = ObjectMapper().writeValueAsString(files["folder1"]?.toFolderResponse())
+        val expectedJson = ObjectMapper().writeValueAsString(files[ROOT_FOLDER]?.toFolderResponse())
 
-        assertThat(expectedJson).isEqualTo("""{"folders":[{"name":"subFolder"}],"files":[{"name":"file1"},{"name":"file2"}]}""")
+        assertThat(expectedJson).isEqualTo("""{"folders":[{"name":"subFolder","date":{"epochSecond":0,"nano":0},"fullFolderPath":"folder1"}],"files":[{"name":"file1","date":{"epochSecond":0,"nano":0},"size":123,"folderPath":"folder1"},{"name":"file2","date":{"epochSecond":0,"nano":0},"size":123,"folderPath":"folder1"}]}""".trimIndent())
     }
 
 
     @Test
     fun `retrieve list of all files in dir`() {
-        val expectedJson = ObjectMapper().writeValueAsString(files["folder1"]?.toFolderResponse())
+        val expectedJson = ObjectMapper().writeValueAsString(files[ROOT_FOLDER]?.toFolderResponse())
         val req = Request(Method.GET, "/folder/folder1").headers(connectionHeaders)
 
         val response = handler(req)
@@ -88,7 +93,7 @@ class RestfulServerTest {
 
     @Test
     fun `can't create a directory that exists`() {
-        val folderPath = "folder1"
+        val folderPath = ROOT_FOLDER
         val createDirectory = Request(Method.PUT, "/folder/$folderPath").headers(connectionHeaders)
 
         assertThat(handler(createDirectory)).all {
@@ -100,7 +105,7 @@ class RestfulServerTest {
 
     @Test
     fun `delete a directory`() {
-        val folderPath = "folder1"
+        val folderPath = ROOT_FOLDER
         val createDirectory = Request(Method.DELETE, "/folder/$folderPath").headers(connectionHeaders)
 
         assertThat(handler(createDirectory)).all {
