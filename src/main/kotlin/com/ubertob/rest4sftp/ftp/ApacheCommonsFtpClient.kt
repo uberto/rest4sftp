@@ -1,12 +1,12 @@
 package com.ubertob.rest4sftp.ftp
 
 import com.ubertob.rest4sftp.http.UnauthorisedException
+import com.ubertob.rest4sftp.model.RemoteHost
+import com.ubertob.rest4sftp.model.SimpleRemoteClient
 import org.apache.commons.net.PrintCommandListener
 import org.apache.commons.net.ftp.FTPClient
 import org.apache.commons.net.ftp.FTPFile
 import org.apache.commons.net.ftp.FTPReply
-import com.ubertob.rest4sftp.model.RemoteHost
-import com.ubertob.rest4sftp.model.SimpleRemoteClient
 import java.io.InputStream
 import java.io.PrintWriter
 import java.time.Duration
@@ -34,6 +34,9 @@ class ApacheCommonsFtpClient(private val remoteHost: RemoteHost, val timeout: Du
             }
         }
     }
+
+    override fun isConnected(): Boolean =
+        ftp.isConnected
 
     override fun listFiles(directoryName: String): List<FTPFile>? =
         if (ftp.changeWorkingDirectory(directoryName))

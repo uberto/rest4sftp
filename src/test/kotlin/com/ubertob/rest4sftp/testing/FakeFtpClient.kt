@@ -12,6 +12,8 @@ class FakeFtpClient(
         private val files: MutableMap<String, ByteArray>
 ) : SimpleRemoteClient {
 
+    var connected = false
+
     override fun listFiles(directoryName: String): List<FTPFile>? =
             if (directories.contains(directoryName.withLeadingSlash())) {
                 files.map {
@@ -46,7 +48,10 @@ class FakeFtpClient(
     override fun connect(): SimpleRemoteClient =
             if (remoteHost.password.contains("bad"))
                 throw UnauthorisedException(message = "invalid password")
-            else this
+            else {
+                connected = true
+                this
+            }
 
     override fun renameFile(directoryName: String, oldFileName: String, newFileName: String): Boolean =
             retrieveFile(directoryName, oldFileName)
@@ -57,7 +62,11 @@ class FakeFtpClient(
                     }
                     ?: false
 
-    override fun close() = Unit
+    override fun close() {
+        connected = false
+    }
+
+    override fun isConnected(): Boolean = connected
 
     private fun String.withLeadingSlash() = if (startsWith('/')) this else "/$this"
 }
