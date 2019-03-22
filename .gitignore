@@ -11,6 +11,9 @@
 # IntelliJ
 out/
 
+# Gradle
+build/
+
 # JIRA plugin
 atlassian-ide-plugin.xml
 
