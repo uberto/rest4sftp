@@ -4,6 +4,8 @@ import assertk.all
 import assertk.assertThat
 import assertk.assertions.isEqualTo
 import com.fasterxml.jackson.databind.ObjectMapper
+import com.fasterxml.jackson.databind.SerializationConfig
+import com.fasterxml.jackson.databind.SerializationFeature
 import com.ubertob.rest4sftp.http.CustomHeaders
 import com.ubertob.rest4sftp.http.RestfulServer
 import com.ubertob.rest4sftp.model.CommandHandler
@@ -11,14 +13,11 @@ import com.ubertob.rest4sftp.model.FileInfo
 import com.ubertob.rest4sftp.model.FolderInfo
 import com.ubertob.rest4sftp.model.toFolderResponse
 import com.ubertob.rest4sftp.testing.SpySimpleRemoteClient
-import org.http4k.core.Body
-import org.http4k.core.Method
-import org.http4k.core.Request
-import org.http4k.core.Response
-import org.http4k.core.Status
+import org.http4k.core.*
 import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Test
 import java.time.Instant
+import javax.xml.catalog.CatalogFeatures
 
 
 class RestfulServerTest {
@@ -47,9 +46,39 @@ class RestfulServerTest {
 
     @Test
     fun `map files to folder response`() {
-        val expectedJson = ObjectMapper().writeValueAsString(files[ROOT_FOLDER]?.toFolderResponse())
+        val expectedJson = ObjectMapper()
+                .configure(SerializationFeature.ORDER_MAP_ENTRIES_BY_KEYS, true)
+                .writerWithDefaultPrettyPrinter()
+                .writeValueAsString(files[ROOT_FOLDER]?.toFolderResponse())
 
-        assertThat(expectedJson).isEqualTo("""{"folders":[{"name":"subFolder","date":{"epochSecond":0,"nano":0},"fullFolderPath":"folder1"}],"files":[{"name":"file1","date":{"epochSecond":0,"nano":0},"size":123,"folderPath":"folder1"},{"name":"file2","date":{"epochSecond":0,"nano":0},"size":123,"folderPath":"folder1"}]}""".trimIndent())
+        assertThat(expectedJson).isEqualTo(
+"""{
+  "folders" : [ {
+    "name" : "subFolder",
+    "date" : {
+      "nano" : 0,
+      "epochSecond" : 0
+    },
+    "fullFolderPath" : "folder1"
+  } ],
+  "files" : [ {
+    "name" : "file1",
+    "date" : {
+      "nano" : 0,
+      "epochSecond" : 0
+    },
+    "size" : 123,
+    "folderPath" : "folder1"
+  }, {
+    "name" : "file2",
+    "date" : {
+      "nano" : 0,
+      "epochSecond" : 0
+    },
+    "size" : 123,
+    "folderPath" : "folder1"
+  } ]
+}""".trimIndent())
     }
 
 
