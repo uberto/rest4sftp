@@ -1,5 +1,5 @@
 group 'com.github.uberto'
-version '0.9.1'
+version '0.9.1-SNAPSHOT'
 
 apply plugin: "application"
 apply plugin: "idea"
