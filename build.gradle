@@ -8,17 +8,15 @@ apply plugin: 'com.bmuschko.nexus'
 apply plugin: 'io.codearte.nexus-staging'
 
 ext {
-    httpVersion = "4.5.3"
-    http4kVersion = "3.112.0"
-    jettyVersion = "9.4.7.v20170914"
+    http4kVersion = "3.279.0"
     jvmVersion = "1.8"
     slf4jVersion = "1.7.25"
     junitVersion = '5.4.0'
-    jacksonVersion = '2.9.8'
+    jacksonVersion = '2.10.5'
 }
 
 buildscript {
-    ext.kotlinVersion = "1.3.20"
+    ext.kotlinVersion = "1.4.20"
 
     repositories {
         jcenter()
@@ -80,7 +78,7 @@ dependencies{
     compile "org.jetbrains.kotlin:kotlin-stdlib-jdk8:${kotlinVersion}"
     compile "org.jetbrains.kotlin:kotlin-reflect:${kotlinVersion}"
     compile "org.http4k:http4k-core:${http4kVersion}"
-    compile "org.http4k:http4k-client-apache:${http4kVersion}"
+    compile "org.http4k:http4k-client-apache4:${http4kVersion}"
     compile "org.http4k:http4k-server-jetty:${http4kVersion}"
     compile "org.http4k:http4k-multipart:${http4kVersion}"
     compile "com.fasterxml.jackson.core:jackson-core:${jacksonVersion}"
