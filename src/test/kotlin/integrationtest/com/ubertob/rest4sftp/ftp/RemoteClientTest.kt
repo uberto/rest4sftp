@@ -1,17 +1,9 @@
 package integrationtest.com.ubertob.rest4sftp.ftp
 
 import assertk.assertThat
-import assertk.assertions.contains
-import assertk.assertions.isEqualTo
-import assertk.assertions.isGreaterThan
-import assertk.assertions.isGreaterThanOrEqualTo
-import assertk.assertions.isNotNull
-import assertk.assertions.isNull
+import assertk.assertions.*
 import assertk.fail
 import com.ubertob.rest4sftp.model.SimpleRemoteClient
-import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.async
-import kotlinx.coroutines.delay
 import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
@@ -188,16 +180,16 @@ abstract class RemoteClientTest {
         uploadFile.delete()
         uploadTempFile.delete()
         assertFalse(uploadFile.exists())
+        assertFalse(uploadTempFile.exists())
 
+        var createdTemp = false
 
-        val createdTemp = GlobalScope.async {
+        Thread {
             while (true) {
-                delay(1)
-                if (uploadTempFile.exists())
-                    break
+                if (uploadTempFile.exists()) break
             }
-            true
-        }
+            createdTemp = true
+        }.start()
 
         val uploadSuccess = createConnection().use {
             it.uploadFile("/upload", "test-upload.xml", "test".byteInputStream())
@@ -205,7 +197,7 @@ abstract class RemoteClientTest {
 
         assertTrue(uploadSuccess)
         assertTrue(uploadFile.exists())
-        assertTrue(createdTemp.getCompleted())
+        assertTrue(createdTemp)
 
         uploadFile.delete()
 

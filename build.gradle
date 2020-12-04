@@ -79,7 +79,6 @@ dependencies{
 
     compile "org.jetbrains.kotlin:kotlin-stdlib-jdk8:${kotlinVersion}"
     compile "org.jetbrains.kotlin:kotlin-reflect:${kotlinVersion}"
-    compile "org.jetbrains.kotlinx:kotlinx-coroutines-core:1.1.1"
     compile "org.http4k:http4k-core:${http4kVersion}"
     compile "org.http4k:http4k-client-apache:${http4kVersion}"
     compile "org.http4k:http4k-server-jetty:${http4kVersion}"
