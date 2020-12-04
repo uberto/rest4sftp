@@ -13,6 +13,7 @@ out/
 
 # Gradle
 build/
+.gradle/
 
 # JIRA plugin
 atlassian-ide-plugin.xml
