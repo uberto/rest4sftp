@@ -3,6 +3,7 @@ import assertk.Assert
 import assertk.all
 import assertk.assertThat
 import assertk.assertions.isEqualTo
+import com.fasterxml.jackson.databind.MapperFeature
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.databind.SerializationFeature
 import com.ubertob.rest4sftp.http.CustomHeaders
@@ -50,35 +51,36 @@ class RestfulServerTest {
     fun `map files to folder response`() {
         val expectedJson = ObjectMapper()
                 .configure(SerializationFeature.ORDER_MAP_ENTRIES_BY_KEYS, true)
+                .configure(MapperFeature.SORT_PROPERTIES_ALPHABETICALLY, true)
                 .writerWithDefaultPrettyPrinter()
                 .writeValueAsString(files[ROOT_FOLDER]?.toFolderResponse())
 
         assertThat(expectedJson).isEqualTo(
 """{
-  "folders" : [ {
-    "name" : "subFolder",
-    "date" : {
-      "epochSecond" : 0,
-      "nano" : 0
-    },
-    "fullFolderPath" : "folder1"
-  } ],
   "files" : [ {
+    "date" : {
+      "epochSecond" : 0,
+      "nano" : 0
+    },
+    "folderPath" : "folder1",
     "name" : "file1",
-    "date" : {
-      "epochSecond" : 0,
-      "nano" : 0
-    },
-    "size" : 123,
-    "folderPath" : "folder1"
+    "size" : 123
   }, {
-    "name" : "file2",
     "date" : {
       "epochSecond" : 0,
       "nano" : 0
     },
-    "size" : 123,
-    "folderPath" : "folder1"
+    "folderPath" : "folder1",
+    "name" : "file2",
+    "size" : 123
+  } ],
+  "folders" : [ {
+    "date" : {
+      "epochSecond" : 0,
+      "nano" : 0
+    },
+    "fullFolderPath" : "folder1",
+    "name" : "subFolder"
   } ]
 }""".trimIndent())
     }
