@@ -1,11 +1,7 @@
 package com.ubertob.rest4sftp.ftp
 
 import com.ubertob.rest4sftp.http.UnauthorisedException
-import com.ubertob.rest4sftp.model.FileInfo
-import com.ubertob.rest4sftp.model.FileSystemElement
-import com.ubertob.rest4sftp.model.FolderInfo
-import com.ubertob.rest4sftp.model.RemoteHost
-import com.ubertob.rest4sftp.model.SimpleRemoteClient
+import com.ubertob.rest4sftp.model.*
 import org.apache.commons.net.PrintCommandListener
 import org.apache.commons.net.ftp.FTPClient
 import org.apache.commons.net.ftp.FTPFile
@@ -14,7 +10,7 @@ import java.io.InputStream
 import java.io.PrintWriter
 import java.time.Duration
 
-class ApacheCommonsFtpClient(private val remoteHost: RemoteHost, val timeout: Duration, val tempExtension: String = ".io") : SimpleRemoteClient {
+class ApacheCommonsFtpClient(private val remoteHost: RemoteHost, private val timeout: Duration, private val tempExtension: String = ".io") : SimpleRemoteClient {
 
     private val ftp = FTPClient()
 
@@ -44,6 +40,11 @@ class ApacheCommonsFtpClient(private val remoteHost: RemoteHost, val timeout: Du
     override fun listFiles(folderPath: String): List<FileSystemElement>? =
         if (ftp.changeWorkingDirectory(folderPath))
             ftp.listFiles().toFileSystemElements(folderPath)
+        else null
+
+    override fun listFiles(folderPath: String, filter: Filter): List<FileSystemElement>? =
+        if (ftp.changeWorkingDirectory(folderPath))
+            ftp.listFiles(null) { resource -> resource.toFileSystemElement(folderPath)?.let { filter.accept(it) } ?: false } .toFileSystemElements(folderPath)
         else null
 
     override fun createFolder(folderPath: String): Boolean = ftp.makeDirectory(folderPath)
@@ -91,5 +92,11 @@ class ApacheCommonsFtpClient(private val remoteHost: RemoteHost, val timeout: Du
 }
 
 private fun Array<FTPFile>.toFileSystemElements(folderPath: String): List<FileSystemElement> =
-    filter { it.isFile }.map { FileInfo(it.name, it.timestamp.toInstant(), it.size, folderPath) } +
-        filter { it.isDirectory }.map { FolderInfo(it.name, it.timestamp.toInstant(), folderPath) }
+    mapNotNull { ftpFile -> ftpFile.toFileSystemElement(folderPath) }
+
+private fun FTPFile.toFileSystemElement(folderPath: String): FileSystemElement? =
+    when {
+        isFile -> FileInfo(name, timestamp.toInstant(), size, folderPath)
+        isDirectory -> FolderInfo(name, timestamp.toInstant(), folderPath)
+        else -> null
+    }

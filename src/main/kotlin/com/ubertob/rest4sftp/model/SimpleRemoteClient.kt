@@ -5,6 +5,7 @@ import java.io.InputStream
 interface SimpleRemoteClient : AutoCloseable {
 
     fun listFiles(folderPath: String): List<FileSystemElement>?
+    fun listFiles(folderPath: String, filter: Filter): List<FileSystemElement>?
     fun createFolder(folderPath: String): Boolean
     fun deleteFolder(folderPath: String): Boolean
     fun retrieveFile(folderPath: String, fileName: String): ByteArray?

@@ -3,6 +3,7 @@ package integrationtest.com.ubertob.rest4sftp.ftp
 import assertk.assertThat
 import assertk.assertions.*
 import assertk.fail
+import com.ubertob.rest4sftp.model.Filter
 import com.ubertob.rest4sftp.model.SimpleRemoteClient
 import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertTrue
@@ -27,6 +28,17 @@ abstract class RemoteClientTest {
         assertThat(names).contains("test-xml.xml")
         assertThat(names).contains("test-text.txt")
 
+    }
+
+    @Test
+    fun `retrieve list of all files based on pattern`() {
+
+        val files = createConnection().use { it.listFiles("/upload", Filter("xml".toRegex())) }
+
+        val names = files?.map { it.name } ?: fail("retrieve failed")
+
+        assertThat(files.size).isEqualTo(1)
+        assertThat(names).contains("test-xml.xml")
     }
 
     @Test

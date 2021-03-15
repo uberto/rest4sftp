@@ -1,4 +1,4 @@
-
+package com.ubertob.rest4sftp.http
 import assertk.Assert
 import assertk.all
 import assertk.assertThat
@@ -6,8 +6,6 @@ import assertk.assertions.isEqualTo
 import com.fasterxml.jackson.databind.MapperFeature
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.databind.SerializationFeature
-import com.ubertob.rest4sftp.http.CustomHeaders
-import com.ubertob.rest4sftp.http.RestfulServer
 import com.ubertob.rest4sftp.model.CommandHandler
 import com.ubertob.rest4sftp.model.FileInfo
 import com.ubertob.rest4sftp.model.FolderInfo
