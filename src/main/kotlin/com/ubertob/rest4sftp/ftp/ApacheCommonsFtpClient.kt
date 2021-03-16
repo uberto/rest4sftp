@@ -43,7 +43,7 @@ class ApacheCommonsFtpClient(
 
     override fun listFiles(folderPath: String, filter: Filter): List<FileSystemElement>? =
         if (ftp.changeWorkingDirectory(folderPath))
-            ftp.listFiles(null) { resource ->
+            ftp.listFiles(filter.pattern) { resource ->
                 resource.toFileSystemElement(folderPath)?.let { filter.accept(it) } ?: false
             }.toFileSystemElements(folderPath)
         else null

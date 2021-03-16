@@ -1,6 +1,6 @@
 package com.ubertob.rest4sftp.model
 
-class Filter(private val pattern: String?) {
+class Filter(val pattern: String?) {
 
     fun accept(fileInfo: FileSystemElement): Boolean =
         pattern?.let {
