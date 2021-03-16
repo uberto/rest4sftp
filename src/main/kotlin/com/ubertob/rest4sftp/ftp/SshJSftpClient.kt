@@ -29,17 +29,6 @@ class SshJSftpClient(private val remoteHost: RemoteHost, private val timeout: Du
             FolderInfo(rrinfo.name, Instant.ofEpochSecond(rrinfo.attributes.atime), folderPath)
         }
 
-    override fun listFiles(folderPath: String): List<FileSystemElement>? =
-            runCatching {
-                sshClient.newSFTPClient().use { sftpClient ->
-                    sftpClient.ls(folderPath).map{toFtpFile(it, folderPath)}
-                }
-            }.getOrNull()
-                    .also {
-                        logger.info("GET -> ${remoteHost.userName}@${remoteHost.host}:${remoteHost.port}/$folderPath/ <- ${it?.size
-                                ?: "null"} items")
-                    }
-
     override fun listFiles(folderPath: String, filter: Filter): List<FileSystemElement>? =
         runCatching {
             sshClient.newSFTPClient().use { sftpClient ->
@@ -162,4 +151,3 @@ class InMemoryInputFile(private val uploadStream: InputStream) : InMemorySourceF
 
     override fun getInputStream(): InputStream = uploadStream
 }
-

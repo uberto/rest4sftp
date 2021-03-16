@@ -26,7 +26,7 @@ abstract class RemoteClientTest {
     @Test
     fun `retrieve list of all files in dir`() {
 
-        val files = createConnection().use { it.listFiles("/upload") }
+        val files = createConnection().use { it.listFiles("/upload", Filter(null)) }
 
         val names = files?.map { it.name } ?: fail("retrieve failed")
 
@@ -64,7 +64,7 @@ abstract class RemoteClientTest {
     @Test
     fun `retrieves nothing from non existent dir`() {
 
-        val files = createConnection().use { it.listFiles("/upload123") }
+        val files = createConnection().use { it.listFiles("/upload123", Filter(null)) }
 
         assertThat(files).isNull()
     }

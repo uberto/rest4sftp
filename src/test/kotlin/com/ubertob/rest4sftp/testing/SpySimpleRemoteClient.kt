@@ -25,11 +25,6 @@ class SpySimpleRemoteClient(
     var connected: Boolean = false
     override fun isConnected(): Boolean = connected
 
-    override fun listFiles(folderPath: String): List<FileSystemElement>? {
-        assertTrue(connected)
-        return files[folderPath]
-    }
-
     override fun listFiles(folderPath: String, filter: Filter): List<FileSystemElement>? {
         assertTrue(connected)
         return files[folderPath]?.filter { filter.accept(it) }
