@@ -3,13 +3,7 @@ import assertk.Assert
 import assertk.all
 import assertk.assertThat
 import assertk.assertions.isEqualTo
-import com.fasterxml.jackson.databind.MapperFeature
-import com.fasterxml.jackson.databind.ObjectMapper
-import com.fasterxml.jackson.databind.SerializationFeature
-import com.ubertob.rest4sftp.model.CommandHandler
-import com.ubertob.rest4sftp.model.FileInfo
-import com.ubertob.rest4sftp.model.FolderInfo
-import com.ubertob.rest4sftp.model.toFolderResponse
+import com.ubertob.rest4sftp.model.*
 import com.ubertob.rest4sftp.testing.SpySimpleRemoteClient
 import org.http4k.core.Body
 import org.http4k.core.Method
@@ -47,46 +41,19 @@ class RestfulServerTest {
 
     @Test
     fun `map files to folder response`() {
-        val expectedJson = ObjectMapper()
-                .configure(SerializationFeature.ORDER_MAP_ENTRIES_BY_KEYS, true)
-                .configure(MapperFeature.SORT_PROPERTIES_ALPHABETICALLY, true)
-                .writerWithDefaultPrettyPrinter()
-                .writeValueAsString(files[ROOT_FOLDER]?.toFolderResponse())
+        val folderResponse = files[ROOT_FOLDER]?.toFolderResponse() ?: error("$ROOT_FOLDER empty!")
+        val expectedJson = JFolderResponse.toJson(folderResponse)
 
         assertThat(expectedJson).isEqualTo(
-"""{
-  "files" : [ {
-    "date" : {
-      "epochSecond" : 0,
-      "nano" : 0
-    },
-    "folderPath" : "folder1",
-    "name" : "file1",
-    "size" : 123
-  }, {
-    "date" : {
-      "epochSecond" : 0,
-      "nano" : 0
-    },
-    "folderPath" : "folder1",
-    "name" : "file2",
-    "size" : 123
-  } ],
-  "folders" : [ {
-    "date" : {
-      "epochSecond" : 0,
-      "nano" : 0
-    },
-    "fullFolderPath" : "folder1",
-    "name" : "subFolder"
-  } ]
-}""".trimIndent())
+"""{"folders": [{"name": "subFolder", "date": "1970-01-01T00:00:00Z", "fullFolderPath": "folder1"}], "files": [{"name": "file1", "date": "1970-01-01T00:00:00Z", "size": 123, "folderPath": "folder1"}, {"name": "file2", "date": "1970-01-01T00:00:00Z", "size": 123, "folderPath": "folder1"}]}""".trimIndent())
     }
 
 
     @Test
     fun `retrieve list of all files in dir`() {
-        val expectedJson = ObjectMapper().writeValueAsString(files[ROOT_FOLDER]?.toFolderResponse())
+        val folderResponse = files[ROOT_FOLDER]?.toFolderResponse() ?: error("$ROOT_FOLDER empty!")
+        val expectedJson = JFolderResponse.toJson(folderResponse)
+
         val req = Request(Method.GET, "/folder/folder1").headers(connectionHeaders)
 
         val response = handler(req)
@@ -100,7 +67,9 @@ class RestfulServerTest {
 
     @Test
     fun `retrieve list of all files in dir with name filter`() {
-        val expectedJson = ObjectMapper().writeValueAsString(files[ROOT_FOLDER]?.filter { it.name == "file1" }?.toFolderResponse())
+        val folderResponse = files[ROOT_FOLDER]?.filter { it.name == "file1" }?.toFolderResponse() ?: error("$ROOT_FOLDER empty!")
+        val expectedJson = JFolderResponse.toJson(folderResponse)
+
         val req = Request(Method.GET, "/folder/folder1").query("name", "*1").headers(connectionHeaders)
 
         val response = handler(req)
