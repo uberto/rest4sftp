@@ -5,7 +5,7 @@
 # verify it's all working with ./pre-commit
 # launch:
 
-./gradlew uploadArchives -p rest4sftp
+./gradlew uploadArchives
 
 # then go to sonatype site and login
 # https://oss.sonatype.org/#nexus-search;quick~rest4sftp
