@@ -8,8 +8,14 @@ import com.ubertob.rest4sftp.model.SimpleRemoteClient
 import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.TestInstance
+import org.junit.jupiter.api.TestInstance.Lifecycle.PER_CLASS
+import org.junit.jupiter.params.ParameterizedTest
+import org.junit.jupiter.params.provider.Arguments
+import org.junit.jupiter.params.provider.MethodSource
 import java.io.File
 
+@TestInstance(PER_CLASS)
 abstract class RemoteClientTest {
 
 
@@ -30,16 +36,30 @@ abstract class RemoteClientTest {
 
     }
 
-    @Test
-    fun `retrieve list of all files based on pattern`() {
-
-        val files = createConnection().use { it.listFiles("/upload", Filter("xml".toRegex())) }
+    @ParameterizedTest
+    @MethodSource("filterPatterns")
+    fun `retrieve list of all files based on pattern`(pattern: String, expectedFiles: List<String>) {
+        val files = createConnection().use { it.listFiles("/upload", Filter(pattern)) }
 
         val names = files?.map { it.name } ?: fail("retrieve failed")
 
-        assertThat(files.size).isEqualTo(1)
-        assertThat(names).contains("test-xml.xml")
+        assertThat(names).isEqualTo(expectedFiles)
     }
+
+    @Suppress("unused")
+    private fun filterPatterns() = setOf(
+        Arguments.of("*.xml", listOf("test-xml.xml")),
+        Arguments.of("test.xml.xml", emptyList<String>()),
+        Arguments.of("test-xml.xm?", listOf("test-xml.xml")),
+        Arguments.of("test\\-xml.xml", emptyList<String>()),
+        Arguments.of("test-+xml.xml", emptyList<String>()),
+        Arguments.of("test-(x)ml.xml", emptyList<String>()),
+        Arguments.of("test-[x]ml.xml", emptyList<String>()),
+        Arguments.of("test-x{1}ml.xml", emptyList<String>()),
+        Arguments.of("^test-xml.xml", emptyList<String>()),
+        Arguments.of("test-xml.xml$", emptyList<String>()),
+        Arguments.of("something|test-xml.xml", emptyList<String>()),
+    )
 
     @Test
     fun `retrieves nothing from non existent dir`() {
