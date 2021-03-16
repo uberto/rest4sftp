@@ -1,15 +1,16 @@
 package com.ubertob.rest4sftp.testing
 
 import com.ubertob.rest4sftp.http.UnauthorisedException
-import com.ubertob.rest4sftp.model.FileInfo
-import com.ubertob.rest4sftp.model.FileSystemElement
-import com.ubertob.rest4sftp.model.RemoteHost
-import com.ubertob.rest4sftp.model.SimpleRemoteClient
+import com.ubertob.rest4sftp.model.*
 import org.junit.jupiter.api.Assertions.assertTrue
 import java.io.InputStream
 import java.time.Instant
 
-class SpySimpleRemoteClient(val remoteHost: RemoteHost, val files: MutableMap<String, MutableList<FileSystemElement>>, val filesContent: MutableMap<String, ByteArray>) : SimpleRemoteClient {
+class SpySimpleRemoteClient(
+    private val remoteHost: RemoteHost,
+    private val files: MutableMap<String, MutableList<FileSystemElement>>,
+    private val filesContent: MutableMap<String, ByteArray>
+) : SimpleRemoteClient {
 
     override fun deleteFolder(folderPath: String): Boolean {
         assertTrue(connected)
@@ -24,9 +25,9 @@ class SpySimpleRemoteClient(val remoteHost: RemoteHost, val files: MutableMap<St
     var connected: Boolean = false
     override fun isConnected(): Boolean = connected
 
-    override fun listFiles(folderPath: String): List<FileSystemElement>? {
+    override fun listFiles(folderPath: String, filter: Filter): List<FileSystemElement>? {
         assertTrue(connected)
-        return files[folderPath]
+        return files[folderPath]?.filter { filter.accept(it) }
     }
 
     override fun retrieveFile(folderPath: String, fileName: String): ByteArray? {

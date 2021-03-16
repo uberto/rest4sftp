@@ -17,7 +17,7 @@ class RestfulServer(private val commandHandler: CommandHandler) : HttpHandler {
 
     override fun invoke(request: Request): Response =
         routes(
-            "/folder/{path:.*}" bind GET to { RetrieveFolder(it.path()).process(it) },
+            "/folder/{path:.*}" bind GET to { RetrieveFolder(it.path(), Filter(it.query("name"))).process(it) },
             "/folder/{path:.*}" bind PUT to { CreateFolder(it.path()).process(it) },
             "/folder/{path:.*}" bind DELETE to { DeleteFolder(it.path()).process(it) },
             "/file/{path:.*}" bind GET to { RetrieveFile(it.directoryName(), it.fileName()).process(it) },

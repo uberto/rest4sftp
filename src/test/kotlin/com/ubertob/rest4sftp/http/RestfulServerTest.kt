@@ -1,4 +1,4 @@
-
+package com.ubertob.rest4sftp.http
 import assertk.Assert
 import assertk.all
 import assertk.assertThat
@@ -6,8 +6,6 @@ import assertk.assertions.isEqualTo
 import com.fasterxml.jackson.databind.MapperFeature
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.databind.SerializationFeature
-import com.ubertob.rest4sftp.http.CustomHeaders
-import com.ubertob.rest4sftp.http.RestfulServer
 import com.ubertob.rest4sftp.model.CommandHandler
 import com.ubertob.rest4sftp.model.FileInfo
 import com.ubertob.rest4sftp.model.FolderInfo
@@ -90,6 +88,20 @@ class RestfulServerTest {
     fun `retrieve list of all files in dir`() {
         val expectedJson = ObjectMapper().writeValueAsString(files[ROOT_FOLDER]?.toFolderResponse())
         val req = Request(Method.GET, "/folder/folder1").headers(connectionHeaders)
+
+        val response = handler(req)
+        assertThat(response).all {
+            hasStatus(Status.OK)
+            hasBody(expectedJson)
+        }
+
+        assertFalse(fakeFtpClient.isConnected())
+    }
+
+    @Test
+    fun `retrieve list of all files in dir with name filter`() {
+        val expectedJson = ObjectMapper().writeValueAsString(files[ROOT_FOLDER]?.filter { it.name == "file1" }?.toFolderResponse())
+        val req = Request(Method.GET, "/folder/folder1").query("name", "*1").headers(connectionHeaders)
 
         val response = handler(req)
         assertThat(response).all {
@@ -230,4 +242,3 @@ class RestfulServerTest {
         transform { assertThat(it.bodyString()).isEqualTo(expected) }
     }
 }
-

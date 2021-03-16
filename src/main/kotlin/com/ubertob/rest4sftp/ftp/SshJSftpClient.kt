@@ -1,12 +1,7 @@
 package com.ubertob.rest4sftp.ftp
 
 import com.ubertob.rest4sftp.http.UnauthorisedException
-import com.ubertob.rest4sftp.model.CommandHandler
-import com.ubertob.rest4sftp.model.FileInfo
-import com.ubertob.rest4sftp.model.FileSystemElement
-import com.ubertob.rest4sftp.model.FolderInfo
-import com.ubertob.rest4sftp.model.RemoteHost
-import com.ubertob.rest4sftp.model.SimpleRemoteClient
+import com.ubertob.rest4sftp.model.*
 import net.schmizz.sshj.DefaultConfig
 import net.schmizz.sshj.SSHClient
 import net.schmizz.sshj.sftp.FileMode
@@ -23,29 +18,27 @@ import java.time.Duration
 import java.time.Instant
 import java.util.logging.Logger
 
-
 class SshJSftpClient(private val remoteHost: RemoteHost, private val timeout: Duration) : SimpleRemoteClient {
     private val sshClient = SSHClient(DefaultConfig())
 
 
-    fun toFtpFile(rrinfo: RemoteResourceInfo, folderPath: String): FileSystemElement =
+    private fun toFtpFile(rrinfo: RemoteResourceInfo, folderPath: String): FileSystemElement =
         if (rrinfo.attributes.type == FileMode.Type.REGULAR) {
             FileInfo(rrinfo.name, Instant.ofEpochSecond(rrinfo.attributes.atime), rrinfo.attributes.size, folderPath)
         } else {
             FolderInfo(rrinfo.name, Instant.ofEpochSecond(rrinfo.attributes.atime), folderPath)
         }
 
-    override fun listFiles(folderPath: String): List<FileSystemElement>? =
-
-            runCatching {
-                sshClient.newSFTPClient().use { sftpClient ->
-                    sftpClient.ls(folderPath).map{toFtpFile(it, folderPath)}
-                }
-            }.getOrNull()
-                    .also {
-                        logger.info("GET -> ${remoteHost.userName}@${remoteHost.host}:${remoteHost.port}/$folderPath/ <- ${it?.size
-                                ?: "null"} items")
-                    }
+    override fun listFiles(folderPath: String, filter: Filter): List<FileSystemElement>? =
+        runCatching {
+            sshClient.newSFTPClient().use { sftpClient ->
+                sftpClient.ls(folderPath) { resource -> filter.accept(toFtpFile(resource, folderPath)) }.map{toFtpFile(it, folderPath)}
+            }
+        }.getOrNull()
+            .also {
+                logger.info("GET -> ${remoteHost.userName}@${remoteHost.host}:${remoteHost.port}/$folderPath/ <- ${it?.size
+                    ?: "null"} items")
+            }
 
     override fun createFolder(folderPath: String): Boolean =
             runWithNoExceptions {
@@ -145,17 +138,16 @@ class SshJSftpClient(private val remoteHost: RemoteHost, private val timeout: Du
 private infix fun String.slash(fileName: String): String = Paths.get(this, fileName).toString()
 
 
-class InMemoryOutputFile() : InMemoryDestFile() {
+class InMemoryOutputFile : InMemoryDestFile() {
     val outputStream = ByteArrayOutputStream()
 
     override fun getOutputStream(): OutputStream = outputStream
 }
 
-class InMemoryInputFile(val uploadStream: InputStream) : InMemorySourceFile() {
+class InMemoryInputFile(private val uploadStream: InputStream) : InMemorySourceFile() {
     override fun getLength(): Long = 0
 
     override fun getName(): String = "MemoryFile"
 
     override fun getInputStream(): InputStream = uploadStream
 }
-

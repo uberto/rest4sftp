@@ -10,7 +10,7 @@ typealias SimpleFtpClientFactory = (RemoteHost) -> SimpleRemoteClient
 
 sealed class Command
 
-data class RetrieveFolder(val path: String) : Command()
+data class RetrieveFolder(val path: String, val filter: Filter) : Command()
 data class DeleteFolder(val path: String) : Command()
 data class CreateFolder(val path: String) : Command()
 data class DeleteFile(val path: String, val fileName: String) : Command()
@@ -40,7 +40,7 @@ class CommandHandler(internal val ftpClientFactory: SimpleFtpClientFactory) {
                     ?: HttpResult(NOT_FOUND, StringResponseBody(""))
         }
         is RetrieveFolder -> {
-            remoteHost.execute { listFiles(cmd.path) }?.let { listFiles ->
+            remoteHost.execute { listFiles(cmd.path, cmd.filter) }?.let { listFiles ->
                 val json = jsonMapper.writeValueAsString(listFiles.toFolderResponse())
                 HttpResult(OK, JsonResponseBody(json))
             } ?: HttpResult(NOT_FOUND, StringResponseBody(""))
@@ -62,4 +62,3 @@ class CommandHandler(internal val ftpClientFactory: SimpleFtpClientFactory) {
     private fun <T> RemoteHost.execute(block: SimpleRemoteClient.() -> T): T = ftpClientFactory(this).connect().use(block)
 
 }
-
