@@ -99,6 +99,20 @@ class RestfulServerTest {
     }
 
     @Test
+    fun `retrieve list of all files in dir with name filter`() {
+        val expectedJson = ObjectMapper().writeValueAsString(files[ROOT_FOLDER]?.filter { it.name == "file1" }?.toFolderResponse())
+        val req = Request(Method.GET, "/folder/folder1").query("name", "*1").headers(connectionHeaders)
+
+        val response = handler(req)
+        assertThat(response).all {
+            hasStatus(Status.OK)
+            hasBody(expectedJson)
+        }
+
+        assertFalse(fakeFtpClient.isConnected())
+    }
+
+    @Test
     fun `non existent folder returns 404`() {
         val req = Request(Method.GET, "/folder/folder3").headers(connectionHeaders)
 
@@ -228,4 +242,3 @@ class RestfulServerTest {
         transform { assertThat(it.bodyString()).isEqualTo(expected) }
     }
 }
-
